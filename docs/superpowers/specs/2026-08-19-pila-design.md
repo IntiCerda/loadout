@@ -165,10 +165,43 @@ The emitted PowerShell must:
    10. `claude-plugin` installs
 5. Print a numbered step header per non-empty phase.
 
+## Platform Targets
+
+**Windows 10 (build 19041+) and Windows 11**, shipping in v1. Windows 10 is the
+harder target and the one to verify against:
+
+| Trap | Why it breaks | Guard |
+|---|---|---|
+| `winget` absent | Preinstalled on Windows 11; on Windows 10 it arrives via App Installer from the Store. A clean Win10 box fails on the first winget call with an unhelpful error. | Preflight `Get-Command winget`, print the Store link, `return` |
+| `wsl --install` on old builds | Needs build 19041+ | Preflight the build number, skip WSL phases with a message rather than failing the run |
+
+**Debian/Ubuntu** ships in Phase 5. Five of the eight installers — `vscode`,
+`npm`, `pipx`, `ollama`, `claude-plugin` — are byte-identical across operating
+systems, so only the system-package layer is genuinely new work. That layer is
+not trivial: VS Code, Docker and Ollama are not in Debian's default
+repositories, which is why `linux.installer` has both an `apt` and a `script`
+variant.
+
+The bash generator's hard contract mirrors the PowerShell one:
+
+- **Nothing may read stdin.** `curl | bash` leaves no controlling terminal, so
+  an apt confirmation or a sudo password prompt hangs forever with no output.
+  Every command is non-interactive by construction
+  (`DEBIAN_FRONTEND=noninteractive`, `-y`).
+- **No bare `sudo`.** The script gates on `id -u` and instructs
+  `sudo bash -c "$(curl -fsSL ...)"`, never `curl ... | sudo bash`.
+- **No `set -e`.** One failed package must not abort the run, matching the
+  Windows behaviour.
+- ASCII only, same reason.
+
 ## Non-Goals (v1)
 
 - No user accounts, no saved kits server-side. The URL is the saved kit.
-- No macOS or Linux output. Windows PowerShell only.
+- No macOS output in any phase. macOS via Homebrew is a later consideration.
+- Linux (Debian/Ubuntu) output is **out of scope for v1 but in scope for the
+  project** — it ships in Phase 5. The `Item` type carries Linux targeting from
+  day one because backfilling a field across 80 catalog entries is the
+  expensive part; the second generator is not.
 - No database. The catalog ships with the code.
 - No interactive terminal TUI picker. The one-liner covers terminal delivery;
   an arrow-key menu is separate work with no native PowerShell support.
