@@ -9,10 +9,21 @@ type Props = {
   checked: boolean;
   /** True when another selection pulled this item in via `requires`. */
   required: boolean;
+  /** Position within its category, used to stagger the entrance animation. */
+  index: number;
   onToggle: (id: string) => void;
 };
 
-export function ItemCard({ item, checked, required, onToggle }: Props) {
+/** Milliseconds between one card's entrance and the next. */
+const STAGGER_MS = 25;
+
+/**
+ * Past this the wave stops reading as a wave and starts reading as a wait.
+ * The catalog grows in Task 13, so this is a ceiling, not a formality.
+ */
+const MAX_STAGGERED = 16;
+
+export function ItemCard({ item, checked, required, index, onToggle }: Props) {
   const active = checked || required;
 
   // Pulled in by another selection and never chosen directly, so it cannot be
@@ -24,7 +35,13 @@ export function ItemCard({ item, checked, required, onToggle }: Props) {
 
   return (
     <label
-      className={`group relative flex min-h-[44px] flex-col gap-1 rounded-lg border p-4
+      // The stagger rides on the card itself rather than a wrapper div: the
+      // cards are direct grid children and grid stretches them to equal
+      // heights per row, which an extra block-level wrapper would break.
+      style={{
+        animationDelay: `${Math.min(index, MAX_STAGGERED) * STAGGER_MS}ms`,
+      }}
+      className={`card-in group relative flex min-h-[44px] flex-col gap-1 rounded-lg border p-4
         transition-all duration-200
         focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring
         ${

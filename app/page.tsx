@@ -7,6 +7,7 @@ import { generateScript } from "@/lib/generate";
 import { resolve, totalSizeMb } from "@/lib/resolve";
 import { parseIds, serializeIds } from "@/lib/url";
 import { SITE_URL } from "@/lib/brand";
+import { Hero } from "@/components/hero";
 import { CatalogGrid } from "@/components/catalog-grid";
 import { PackChips } from "@/components/pack-chips";
 import { KitSidebar } from "@/components/kit-sidebar";
@@ -123,6 +124,8 @@ export default function Page() {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <Hero origin={origin} />
+
       <div className="mb-8">
         <PackChips packs={packs} selectedIds={selectedSet} onApply={applyPack} />
       </div>

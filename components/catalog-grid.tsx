@@ -31,12 +31,13 @@ export function CatalogGrid({
               {CATEGORY_LABELS[category]}
             </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {inCategory.map((item) => (
+              {inCategory.map((item, index) => (
                 <ItemCard
                   key={item.id}
                   item={item}
                   checked={selectedIds.has(item.id)}
                   required={requiredIds.has(item.id)}
+                  index={index}
                   onToggle={onToggle}
                 />
               ))}
