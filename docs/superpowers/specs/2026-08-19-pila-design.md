@@ -84,16 +84,16 @@ byte-identical to the delivered script.
 
 | Layer | Choice | Rationale |
 |---|---|---|
-| Framework | Next.js 15 App Router, TypeScript | Native Vercel deploy, zero config |
+| Framework | Next.js 16 App Router, TypeScript | Native Vercel deploy, zero config. Scaffolded at 16.3.1; App Router APIs differ from 15. |
 | Styling | Tailwind v4 | |
-| Components | shadcn/ui (Radix) | Accessible primitives, vendored not vendor-locked |
+| Components | shadcn/ui (Base UI) | Accessible primitives, vendored not vendor-locked. The shadcn CLI now defaults to `@base-ui/react`, not Radix. |
 | Icons | Lucide | SVG only, never emoji |
 | Catalog | Typed TS module in-repo | No database. Data changes on commit, not at runtime. A DB adds ops burden with no benefit. |
 | State | URL `searchParams` | Sharing is free, no session, no backend |
 | Tests | Vitest | Pure functions carry the correctness; no E2E in v1 |
 
 **Checkbox implementation:** native `<input type="checkbox">` inside a styled
-label, not Radix Checkbox. A 200-item grid of Radix Checkboxes is 200 React
+label, not a component-library Checkbox. A 200-item grid of them is 200 React
 subscriptions; the native input is accessible by default, keyboard-navigable by
 default, and free. shadcn is used for Dialog, Tooltip, Accordion, and Button,
 where native equivalents are genuinely painful.
