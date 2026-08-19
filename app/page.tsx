@@ -1,69 +1,105 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useCallback, useMemo, useSyncExternalStore } from "react";
+import { catalog } from "@/data/catalog";
+import { generateScript } from "@/lib/generate";
+import { resolve, totalSizeMb } from "@/lib/resolve";
+import { parseIds, serializeIds } from "@/lib/url";
+import { SITE_URL } from "@/lib/brand";
+import { CatalogGrid } from "@/components/catalog-grid";
+
+/**
+ * `history.replaceState` fires no event, so selection changes announce
+ * themselves. A custom name rather than a synthetic `popstate`, which the App
+ * Router also listens for.
+ */
+const SELECTION_EVENT = "pila:selection";
+
+function subscribeToUrl(onChange: () => void) {
+  window.addEventListener("popstate", onChange);
+  window.addEventListener(SELECTION_EVENT, onChange);
+  return () => {
+    window.removeEventListener("popstate", onChange);
+    window.removeEventListener(SELECTION_EVENT, onChange);
+  };
+}
+
+export default function Page() {
+  // The query string IS the selection state — there is no second copy to keep
+  // in sync. `useSyncExternalStore` renders the server snapshot during
+  // hydration and only then reads the real URL, so server and client HTML
+  // match without an effect that writes state on mount.
+  const search = useSyncExternalStore(
+    subscribeToUrl,
+    () => window.location.search,
+    () => "",
+  );
+
+  const selectedIds = useMemo(
+    () => parseIds(new URLSearchParams(search).get("p")),
+    [search],
+  );
+
+  // Mirror the new selection into the URL without a navigation, so the address
+  // bar is always a shareable link.
+  const toggle = useCallback((id: string) => {
+    const current = parseIds(
+      new URLSearchParams(window.location.search).get("p"),
+    );
+    const next = current.includes(id)
+      ? current.filter((existing) => existing !== id)
+      : [...current, id];
+
+    const query = serializeIds(next);
+    window.history.replaceState(
+      null,
+      "",
+      query
+        ? `${window.location.pathname}?p=${query}`
+        : window.location.pathname,
+    );
+    window.dispatchEvent(new Event(SELECTION_EVENT));
+  }, []);
+
+  const resolved = useMemo(() => resolve(selectedIds, catalog), [selectedIds]);
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const requiredSet = useMemo(
+    () =>
+      new Set(
+        resolved.map((item) => item.id).filter((id) => !selectedSet.has(id)),
+      ),
+    [resolved, selectedSet],
+  );
+
+  // Must match how app/api/script/route.ts builds it, or the previewed script
+  // stops being byte-identical to the delivered one. Both derive from the live
+  // origin; SITE_URL is build-time-inlined here and would skew after an env
+  // change or on a preview deployment, so it serves only as the server
+  // snapshot that keeps hydration quiet.
+  const origin = useSyncExternalStore(
+    subscribeToUrl,
+    () => window.location.origin,
+    () => SITE_URL,
+  );
+
+  const shareUrl = `${origin}/?p=${serializeIds(resolved.map((item) => item.id))}`;
+  const script = useMemo(
+    () => generateScript(resolved, shareUrl),
+    [resolved, shareUrl],
+  );
+  const sizeMb = useMemo(() => totalSizeMb(resolved), [resolved]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <CatalogGrid
+        items={catalog}
+        selectedIds={selectedSet}
+        requiredIds={requiredSet}
+        onToggle={toggle}
+      />
+      {/* Kit sidebar and script preview land in Tasks 8 and 9. */}
+      <pre className="sr-only">{script}</pre>
+      <span className="sr-only">{sizeMb}</span>
+    </main>
   );
 }

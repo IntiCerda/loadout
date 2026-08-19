@@ -25,7 +25,6 @@ describe('generateScript', () => {
   })
 
   it('emits ASCII only', () => {
-    // eslint-disable-next-line no-control-regex
     expect(generateScript([git, ext, model], URL)).toMatch(/^[\x00-\x7F]*$/)
   })
 
@@ -122,7 +121,6 @@ describe('generateScript', () => {
     // silently break `irm | iex` decoding. U+202E is stripped by the same
     // rule, so a bidi override cannot make a comment read as something other
     // than what it runs.
-    // eslint-disable-next-line no-control-regex
     expect(script).toMatch(/^[\x00-\x7F]*$/)
     expect(script).toContain("Install-WingetPackage 'Foo.Bar-'")
   })
