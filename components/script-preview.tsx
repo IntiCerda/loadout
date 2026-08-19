@@ -101,7 +101,7 @@ export function ScriptPreview({ script }: { script: string }) {
           focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         <span>{open ? "Hide script" : "View script"}</span>
-        <span className="text-foreground/40 flex items-center gap-2 font-mono text-xs">
+        <span className="text-foreground/50 flex items-center gap-2 font-mono text-xs">
           {lineCount} lines
           <ChevronDown
             aria-hidden

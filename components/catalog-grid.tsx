@@ -26,7 +26,11 @@ export function CatalogGrid({
           <section key={category} aria-labelledby={`cat-${category}`}>
             <h2
               id={`cat-${category}`}
-              className="text-foreground/40 mb-3 font-mono text-xs tracking-widest uppercase"
+              // Not `/40`. A category heading is the label of its `region` landmark and
+              // the only thing that says what the cards below are, so it is essential
+              // copy: `/40` measures 3.69:1 on the background and fails AA. `/60` is
+              // 6.62:1 and still reads as a quiet label.
+              className="text-foreground/60 mb-3 font-mono text-xs tracking-widest uppercase"
             >
               {CATEGORY_LABELS[category]}
             </h2>

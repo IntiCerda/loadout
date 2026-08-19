@@ -52,9 +52,21 @@ export function KitSidebar({ items, sizeMb, query, origin, children }: Props) {
   };
 
   return (
-    <aside className="lg:sticky lg:top-8 lg:self-start">
+    // `aside` is a `complementary` landmark, and an unlabelled landmark is a
+    // list entry a screen-reader user cannot tell apart from any other. The
+    // heading it already renders is the name.
+    <aside
+      aria-labelledby="kit-heading"
+      className="lg:sticky lg:top-8 lg:self-start"
+    >
       <div className="border-border bg-primary rounded-xl border p-5">
-        <h2 className="text-foreground/40 font-mono text-xs tracking-widest uppercase">
+        {/* Not `/40`: this heading names the landmark and the whole panel, so
+            it is essential copy. `/40` measures 3.50:1 on this card and fails
+            AA; `/60` is 6.00:1. */}
+        <h2
+          id="kit-heading"
+          className="text-foreground/60 font-mono text-xs tracking-widest uppercase"
+        >
           Your kit
         </h2>
 

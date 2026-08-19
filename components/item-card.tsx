@@ -86,7 +86,7 @@ export function ItemCard({ item, checked, required, index, onToggle }: Props) {
         {item.description}
       </span>
 
-      <span className="text-foreground/40 mt-1 flex items-center gap-2 font-mono text-xs">
+      <span className="text-foreground/50 mt-1 flex items-center gap-2 font-mono text-xs">
         <span>{item.installer}</span>
         {item.sizeMb ? <span>{formatSize(item.sizeMb)}</span> : null}
       </span>
