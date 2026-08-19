@@ -12,12 +12,12 @@ const URL = 'https://example.test/?p=git'
 
 describe('generateScript', () => {
   it('never emits a param block, because iex rejects it', () => {
-    expect(generateScript([git, ext, model], URL)).not.toContain('param(')
+    expect(generateScript([git, ext, model], URL).toLowerCase()).not.toContain('param(')
   })
 
   it('never emits a top-level exit, because it would close the console', () => {
     const lines = generateScript([git], URL).split('\n')
-    expect(lines.some((l) => /^\s*exit\b/.test(l))).toBe(false)
+    expect(lines.some((l) => /^\s*exit\b/i.test(l))).toBe(false)
   })
 
   it('emits an administrator check', () => {
@@ -86,6 +86,10 @@ describe('generateScript', () => {
     expect(generateScript([distro], URL)).toContain('19041')
   })
 
+  it('omits the wsl preflight when no wsl items are selected', () => {
+    expect(generateScript([git], URL)).not.toContain('19041')
+  })
+
   it('initialises the wsl skip flag, because iex runs in the caller session scope', () => {
     const distro: Item = { ...base, id: 'u', name: 'Ubuntu', installer: 'wsl', ref: 'Ubuntu' }
     const script = generateScript([distro], URL)
@@ -105,9 +109,84 @@ describe('generateScript', () => {
     expect(offenders).toEqual([])
   })
 
+  it('strips non-ascii from catalog strings, because the contract is ascii-only', () => {
+    const accented: Item = {
+      ...base,
+      id: 'cafe',
+      name: 'Caf\u00e9',
+      installer: 'winget',
+      ref: 'Fo\u2019o.Bar-\u00e9',
+    }
+    const script = generateScript([accented], URL)
+    // A contributor pasting a smart quote or an accent from a doc must not
+    // silently break `irm | iex` decoding. U+202E is stripped by the same
+    // rule, so a bidi override cannot make a comment read as something other
+    // than what it runs.
+    // eslint-disable-next-line no-control-regex
+    expect(script).toMatch(/^[\x00-\x7F]*$/)
+    expect(script).toContain("Install-WingetPackage 'Foo.Bar-'")
+  })
+
+  it('strips path separators from the font id, which lands inside Join-Path', () => {
+    const evil: Item = {
+      ...base,
+      id: '..',
+      name: 'Traversal',
+      installer: 'font',
+      ref: 'https://example.test/f.zip',
+    }
+    // Quoting stops command injection; Join-Path does not normalise `..`, so
+    // traversal is a separate bug class needing a separate rule.
+    const line = generateScript([evil], URL)
+      .split('\n')
+      .find((l) => l.startsWith('Install-Font '))
+    expect(line).toBe("Install-Font 'https://example.test/f.zip' ''  # Traversal")
+  })
+
   it('returns a runnable no-op message for an empty selection', () => {
     const script = generateScript([], URL)
     expect(script).toContain('Nothing selected')
     expect(script).not.toContain('function Install-WingetPackage')
+  })
+
+  it('neutralises a catalog ref that attempts PowerShell injection via double-quote breakout', () => {
+    const evil: Item = {
+      ...base,
+      id: 'evil',
+      name: 'Evil',
+      installer: 'winget',
+      ref: 'Foo"; Write-Host "INJECTED-VIA-REF" -ForegroundColor Magenta; Write-Host "',
+    }
+    const script = generateScript([evil], URL)
+    const line = script.split('\n').find((l) => l.startsWith('Install-WingetPackage '))
+    expect(line).toBeDefined()
+    // The payload lands only inside a single-quoted literal, so it is inert
+    // -- confirmed by the whole call being one quoted argument, not by the
+    // substring being absent (it legitimately appears, just neutralised).
+    expect(line).toMatch(
+      /^Install-WingetPackage 'Foo"; Write-Host "INJECTED-VIA-REF" -ForegroundColor Magenta; Write-Host "'/,
+    )
+    // No stray Write-Host call escapes onto its own executable line.
+    const lines = script.split('\n')
+    expect(lines.some((l) => /^\s*Write-Host "INJECTED-VIA-REF"/.test(l))).toBe(false)
+  })
+
+  it('strips control characters from a catalog name so a newline cannot escape the trailing comment', () => {
+    const evil: Item = {
+      ...base,
+      id: 'evil2',
+      name: 'Evil\nWrite-Host "INJECTED-VIA-NAME"',
+      installer: 'winget',
+      ref: 'Safe.Ref',
+    }
+    const script = generateScript([evil], URL)
+    // The newline is stripped, so the payload stays glued onto the same
+    // comment line as the call instead of starting an executable line of
+    // its own.
+    const lines = script.split('\n')
+    expect(lines.some((l) => /^\s*Write-Host "INJECTED-VIA-NAME"/.test(l))).toBe(false)
+    const callLine = lines.find((l) => l.includes('INJECTED-VIA-NAME'))
+    expect(callLine).toBeDefined()
+    expect(callLine).toMatch(/#.*INJECTED-VIA-NAME/)
   })
 })

@@ -3,15 +3,11 @@ import { totalSizeMb, formatSize } from './resolve'
 import { BRAND } from './brand'
 
 /**
- * `apt` is the Phase 5 Linux target and has no place in a Windows script, so
- * the Windows emitter is keyed on the installer union minus that one member.
- * A plain `Record<Installer, ...>` does not compile.
- */
-/**
  * Installers the Windows emitter handles. Excludes the Linux-only variants so
  * that adding one to `Installer` for the Phase 5 bash target can never silently
  * widen this Record and demand a PowerShell emitter that must not exist.
- * `'script'` is pre-excluded; it joins `Installer` in Task 14.
+ * `'script'` is pre-excluded; it joins `Installer` in Task 14. `apt` is the
+ * Phase 5 Linux target and has no place in a Windows script.
  */
 type WindowsInstaller = Exclude<Installer, 'apt' | 'script'>
 
@@ -46,8 +42,12 @@ const HELPERS: Record<WindowsInstaller, string> = {
 
   wsl: `function Install-WslDistro([string]$Distro) {
     if ($script:SkipWsl) { return }
-    $installed = wsl --list --quiet 2>$null | Select-String ([regex]::Escape($Distro))
-    if ($installed) {
+    # wsl.exe writes UTF-16LE when stdout is redirected, so PowerShell captures
+    # one NUL byte per character and a plain match never fires. Strip them, then
+    # match exactly -- a substring match would skip "Ubuntu" when only
+    # "Ubuntu-22.04" is present.
+    $existing = (wsl --list --quiet 2>$null) -replace "\`0", "" | ForEach-Object { $_.Trim() }
+    if ($existing -contains $Distro) {
         Write-Host "  $Distro already installed, skipping." -ForegroundColor DarkGray
         return
     }
@@ -57,8 +57,13 @@ const HELPERS: Record<WindowsInstaller, string> = {
   font: `function Install-Font([string]$Url, [string]$Name) {
     $zip = Join-Path $env:TEMP "$Name.zip"
     $dir = Join-Path $env:TEMP $Name
-    Invoke-WebRequest -Uri $Url -OutFile $zip -UseBasicParsing
-    Expand-Archive -Path $zip -DestinationPath $dir -Force
+    try {
+        Invoke-WebRequest -Uri $Url -OutFile $zip -UseBasicParsing
+        Expand-Archive -Path $zip -DestinationPath $dir -Force
+    } catch {
+        Write-Host "  Could not download $Name, skipping." -ForegroundColor Yellow
+        return
+    }
     $fonts = (New-Object -ComObject Shell.Application).Namespace(0x14)
     Get-ChildItem -Path $dir -Include '*.ttf','*.otf' -Recurse | ForEach-Object {
         $target = Join-Path "$env:WINDIR\\Fonts" $_.Name
@@ -120,15 +125,56 @@ const HELPERS: Record<WindowsInstaller, string> = {
 }`,
 }
 
+/**
+ * Emit a value as a single-quoted PowerShell literal. Single-quoted strings do
+ * no interpolation, so `$`, a backtick and a double quote are all inert inside
+ * one -- only an apostrophe needs doubling.
+ *
+ * Everything outside printable ASCII is dropped, which covers three hazards
+ * with one rule: a newline would break out of the emitted line; any non-ASCII
+ * byte violates the ASCII-only contract that `irm | iex` depends on; and a bidi
+ * override such as U+202E can make a comment render as something other than
+ * what it executes.
+ *
+ * The catalog is in-repo and trusted, but it grows to ~80 entries with outside
+ * contributions, so one mistyped font URL must not become code execution in an
+ * elevated shell.
+ */
+const PRINTABLE_ASCII_ONLY = /[^\x20-\x7E]/g
+
+function psLiteral(value: string): string {
+  const flat = value.replace(PRINTABLE_ASCII_ONLY, '')
+  return `'${flat.replace(/'/g, "''")}'`
+}
+
+/**
+ * Same rule for a value emitted as a trailing `#` comment. A newline in
+ * `item.name` would otherwise end the comment early and let the rest of the
+ * name run as a new, executable PowerShell line.
+ */
+function commentSafe(value: string): string {
+  return value.replace(PRINTABLE_ASCII_ONLY, '')
+}
+
+/**
+ * `Install-Font` interpolates this into `Join-Path $env:TEMP "$Name.zip"`, and
+ * `Join-Path` does not normalise `..` segments. Quoting stops command
+ * injection; it does nothing about path traversal, which is a different bug
+ * class. Reduce the id to characters that cannot escape a directory.
+ */
+function pathSafe(value: string): string {
+  return value.replace(/[^a-zA-Z0-9-]/g, '')
+}
+
 const CALLS: Record<WindowsInstaller, (item: Item) => string> = {
-  winget: (i) => `Install-WingetPackage "${i.ref}"`,
-  wsl: (i) => `Install-WslDistro "${i.ref}"`,
-  font: (i) => `Install-Font "${i.ref}" "${i.id}"`,
-  vscode: (i) => `Install-VSCodeExtension "${i.ref}"`,
-  npm: (i) => `Install-NpmGlobal "${i.ref}"`,
-  pipx: (i) => `Install-PipxPackage "${i.ref}"`,
-  ollama: (i) => `Install-OllamaModel "${i.ref}"`,
-  'claude-plugin': (i) => `Install-ClaudePlugin "${i.ref}"`,
+  winget: (i) => `Install-WingetPackage ${psLiteral(i.ref)}`,
+  wsl: (i) => `Install-WslDistro ${psLiteral(i.ref)}`,
+  font: (i) => `Install-Font ${psLiteral(i.ref)} ${psLiteral(pathSafe(i.id))}`,
+  vscode: (i) => `Install-VSCodeExtension ${psLiteral(i.ref)}`,
+  npm: (i) => `Install-NpmGlobal ${psLiteral(i.ref)}`,
+  pipx: (i) => `Install-PipxPackage ${psLiteral(i.ref)}`,
+  ollama: (i) => `Install-OllamaModel ${psLiteral(i.ref)}`,
+  'claude-plugin': (i) => `Install-ClaudePlugin ${psLiteral(i.ref)}`,
 }
 
 /**
@@ -223,7 +269,7 @@ export function generateScript(items: Item[], shareUrl: string): string {
   const blocks = active.map((phase, index) => {
     const step = `Write-Host "[${index + 1}/${active.length}] ${phase.label}..." -ForegroundColor Cyan`
     const calls = phase.items
-      .map((item) => `${CALLS[phase.installer](item)}  # ${item.name}`)
+      .map((item) => `${CALLS[phase.installer](item)}  # ${commentSafe(item.name)}`)
       .join('\n')
     const refresh = phase.installer === 'winget' ? `\n\n${REFRESH_PATH}` : ''
     return `${step}\n${calls}${refresh}`

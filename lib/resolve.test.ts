@@ -65,4 +65,8 @@ describe('formatSize', () => {
   it('renders gigabytes with one decimal at or above 1024', () => {
     expect(formatSize(18841)).toBe('18.4 GB')
   })
+
+  it('rounds before comparing against the GB boundary', () => {
+    expect(formatSize(1023.6)).toBe('1.0 GB')
+  })
 })

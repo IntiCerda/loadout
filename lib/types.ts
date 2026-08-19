@@ -58,7 +58,14 @@ export type Item = {
    * would not be.
    */
   linux?: { installer: 'apt'; ref: string }
-  /** Ids of items that must be installed before this one. */
+  /**
+   * Ids of items that must be included whenever this one is selected.
+   *
+   * Governs inclusion only, not install order: `resolve` uses it to pull in
+   * transitive dependencies but returns them in catalog order, and `generate`
+   * groups the result by installer phase -- so a `winget` item is emitted
+   * before a `wsl` item that declares it as a requirement.
+   */
   requires?: string[]
   /** Approximate download size in megabytes. */
   sizeMb?: number
