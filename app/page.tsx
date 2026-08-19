@@ -8,6 +8,7 @@ import { parseIds, serializeIds } from "@/lib/url";
 import { SITE_URL } from "@/lib/brand";
 import { CatalogGrid } from "@/components/catalog-grid";
 import { KitSidebar } from "@/components/kit-sidebar";
+import { ScriptPreview } from "@/components/script-preview";
 
 /**
  * `history.replaceState` fires no event, so selection changes announce
@@ -107,10 +108,10 @@ export default function Page() {
           sizeMb={sizeMb}
           query={query}
           origin={origin}
-        />
+        >
+          <ScriptPreview script={script} />
+        </KitSidebar>
       </div>
-      {/* The script preview lands in Task 9. */}
-      <pre className="sr-only">{script}</pre>
     </main>
   );
 }

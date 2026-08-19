@@ -75,7 +75,12 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    /* Full opacity, not shadcn's default /50. Accent green at 50%% over the
+       card measures 2.65:1 -- below the 3:1 WCAG 2.2 asks of a non-text focus
+       indicator. At full opacity it is 6.42:1. This rule sits in @layer base
+       and sets outline-color for every element, so the /50 leaked into every
+       focus ring in the app. */
+    @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground font-sans;
