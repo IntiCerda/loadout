@@ -2,11 +2,13 @@
 
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { catalog } from "@/data/catalog";
+import { packs } from "@/data/packs";
 import { generateScript } from "@/lib/generate";
 import { resolve, totalSizeMb } from "@/lib/resolve";
 import { parseIds, serializeIds } from "@/lib/url";
 import { SITE_URL } from "@/lib/brand";
 import { CatalogGrid } from "@/components/catalog-grid";
+import { PackChips } from "@/components/pack-chips";
 import { KitSidebar } from "@/components/kit-sidebar";
 import { ScriptPreview } from "@/components/script-preview";
 
@@ -42,17 +44,17 @@ export default function Page() {
     [search],
   );
 
-  // Mirror the new selection into the URL without a navigation, so the address
-  // bar is always a shareable link.
-  const toggle = useCallback((id: string) => {
+  // The single writer for the selection. Every mutation reads the live URL,
+  // transforms it and mirrors the result back without a navigation, so the
+  // address bar is always a shareable link. Reading `window.location` here
+  // rather than closing over `selectedIds` keeps this callback stable and
+  // keeps the URL — not a captured render — as the source of truth.
+  const update = useCallback((next: (current: string[]) => string[]) => {
     const current = parseIds(
       new URLSearchParams(window.location.search).get("p"),
     );
-    const next = current.includes(id)
-      ? current.filter((existing) => existing !== id)
-      : [...current, id];
 
-    const query = serializeIds(next);
+    const query = serializeIds(next(current));
     window.history.replaceState(
       null,
       "",
@@ -62,6 +64,31 @@ export default function Page() {
     );
     window.dispatchEvent(new Event(SELECTION_EVENT));
   }, []);
+
+  const toggle = useCallback(
+    (id: string) => {
+      update((current) =>
+        current.includes(id)
+          ? current.filter((existing) => existing !== id)
+          : [...current, id],
+      );
+    },
+    [update],
+  );
+
+  // Applying a pack adds its items; clicking an already-applied pack removes
+  // exactly the ids it contributed, so packs compose instead of overwriting
+  // and anything selected by hand survives.
+  const applyPack = useCallback(
+    (ids: string[]) => {
+      update((current) =>
+        ids.every((id) => current.includes(id))
+          ? current.filter((id) => !ids.includes(id))
+          : [...current, ...ids.filter((id) => !current.includes(id))],
+      );
+    },
+    [update],
+  );
 
   const resolved = useMemo(() => resolve(selectedIds, catalog), [selectedIds]);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
@@ -96,6 +123,10 @@ export default function Page() {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <PackChips packs={packs} selectedIds={selectedSet} onApply={applyPack} />
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         <CatalogGrid
           items={catalog}

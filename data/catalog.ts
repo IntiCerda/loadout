@@ -159,6 +159,27 @@ export const catalog: Item[] = [
     sizeMb: 30,
   },
 
+  {
+    id: 'ext-eslint',
+    name: 'ESLint',
+    description: 'JavaScript and TypeScript linting inside VS Code.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'dbaeumer.vscode-eslint',
+    requires: ['vscode'],
+    sizeMb: 12,
+  },
+  {
+    id: 'ext-prettier',
+    name: 'Prettier',
+    description: 'Opinionated code formatter for the web stack.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'esbenp.prettier-vscode',
+    requires: ['vscode'],
+    sizeMb: 10,
+  },
+
   // --- fonts ---
   {
     id: 'font-jetbrains-mono',
