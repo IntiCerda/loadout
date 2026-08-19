@@ -1,0 +1,98 @@
+export type Os = 'windows' | 'linux'
+
+export type Installer =
+  | 'winget'
+  | 'apt'
+  | 'vscode'
+  | 'npm'
+  | 'pipx'
+  | 'ollama'
+  | 'claude-plugin'
+  | 'font'
+  | 'wsl'
+
+/**
+ * Installers whose command and package name are identical on every OS. Items
+ * using these need no per-OS data at all — which is why only the ~30 `winget`
+ * items ever need a `linux` field.
+ */
+export const PORTABLE_INSTALLERS: Installer[] = [
+  'vscode',
+  'npm',
+  'pipx',
+  'ollama',
+  'claude-plugin',
+  'font', // same download URL; only the install destination differs
+]
+
+export type Category =
+  | 'languages'
+  | 'editors'
+  | 'tools'
+  | 'containers'
+  | 'ai-apps'
+  | 'ai-models'
+  | 'extensions'
+  | 'fonts'
+  | 'linux'
+
+export type Item = {
+  /** URL-safe slug. Stable forever — it appears in shared links. */
+  id: string
+  name: string
+  description: string
+  category: Category
+  installer: Installer
+  /** winget ID, extension ID, package name, model tag, distro name, or font zip URL. */
+  ref: string
+  /**
+   * Linux equivalent, required only when `installer` is `winget`.
+   *
+   * Items on a PORTABLE_INSTALLERS installer work on Linux as-is and must
+   * leave this undefined. A `winget` item that omits it has no Linux
+   * counterpart and is skipped for that target — as are all `wsl` items,
+   * which are meaningless on Linux.
+   *
+   * This field exists from day one on purpose. The Linux generator lands in
+   * Phase 5 and is cheap; backfilling this across 80 catalog entries later
+   * would not be.
+   */
+  linux?: { installer: 'apt'; ref: string }
+  /** Ids of items that must be installed before this one. */
+  requires?: string[]
+  /** Approximate download size in megabytes. */
+  sizeMb?: number
+  /** Shown in the UI only. Never emitted into the script. */
+  note?: string
+}
+
+export type Pack = {
+  slug: string
+  name: string
+  description: string
+  items: string[]
+}
+
+export const CATEGORY_LABELS: Record<Category, string> = {
+  languages: 'Languages',
+  editors: 'Editors',
+  tools: 'Tools',
+  containers: 'Containers',
+  'ai-apps': 'AI apps',
+  'ai-models': 'Local AI models',
+  extensions: 'VS Code extensions',
+  fonts: 'Fonts',
+  linux: 'Linux',
+}
+
+export const CATEGORY_ORDER: Category[] = [
+  'languages',
+  'editors',
+  'tools',
+  'containers',
+  'ai-apps',
+  'ai-models',
+  'extensions',
+  'fonts',
+  'linux',
+]
