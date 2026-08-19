@@ -7,6 +7,7 @@ import { resolve, totalSizeMb } from "@/lib/resolve";
 import { parseIds, serializeIds } from "@/lib/url";
 import { SITE_URL } from "@/lib/brand";
 import { CatalogGrid } from "@/components/catalog-grid";
+import { KitSidebar } from "@/components/kit-sidebar";
 
 /**
  * `history.replaceState` fires no event, so selection changes announce
@@ -82,7 +83,10 @@ export default function Page() {
     () => SITE_URL,
   );
 
-  const shareUrl = `${origin}/?p=${serializeIds(resolved.map((item) => item.id))}`;
+  // Resolved rather than raw ids, so the share link, the one-liner and the
+  // route all describe the same complete selection.
+  const query = serializeIds(resolved.map((item) => item.id));
+  const shareUrl = `${origin}/?p=${query}`;
   const script = useMemo(
     () => generateScript(resolved, shareUrl),
     [resolved, shareUrl],
@@ -91,15 +95,22 @@ export default function Page() {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <CatalogGrid
-        items={catalog}
-        selectedIds={selectedSet}
-        requiredIds={requiredSet}
-        onToggle={toggle}
-      />
-      {/* Kit sidebar and script preview land in Tasks 8 and 9. */}
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+        <CatalogGrid
+          items={catalog}
+          selectedIds={selectedSet}
+          requiredIds={requiredSet}
+          onToggle={toggle}
+        />
+        <KitSidebar
+          items={resolved}
+          sizeMb={sizeMb}
+          query={query}
+          origin={origin}
+        />
+      </div>
+      {/* The script preview lands in Task 9. */}
       <pre className="sr-only">{script}</pre>
-      <span className="sr-only">{sizeMb}</span>
     </main>
   );
 }

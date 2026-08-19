@@ -23,6 +23,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -63,6 +64,10 @@
   --muted-foreground: #94a3b8;
   --accent-foreground: #0f172a;
   --input: #475569;
+  /* Warning TEXT. `--destructive` is the plan's #ef4444 and stays that value,
+     but as a label on the --primary card (#1e293b) it measures 3.89:1 and
+     fails WCAG AA. Same hue, lightened until it passes: 5.29:1. */
+  --warning: #f87171;
   --ring: #22c55e; /* accent green, so the focus ring is visible on slate */
 
   --radius: 0.625rem;
