@@ -38,7 +38,7 @@ export function Hero({ origin }: Props) {
         <p className="text-foreground/70 mt-4 text-xl">{TAGLINE}</p>
         <p className="text-foreground/50 mx-auto mt-3 max-w-xl">
           Apps, VS Code extensions, fonts, global packages and local AI models.
-          One readable PowerShell script, no installer to trust.
+          One readable script for Windows or Debian, no installer to trust.
         </p>
 
         <div className="border-border bg-primary mt-8 flex items-center gap-3 rounded-xl border px-4 py-3 text-left font-mono text-sm">
