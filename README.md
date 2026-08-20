@@ -4,7 +4,8 @@
 
 Loadout is Ninite for Windows developers: tick apps, VS Code extensions, fonts,
 global packages and local AI models out of a curated catalog, and get back one
-readable PowerShell script that installs all of it.
+readable install script that installs all of it — PowerShell for Windows 10 and
+11, or bash for Debian and Ubuntu.
 
 There is no installer to trust, no account, and no database. The selection
 lives in the query string, so a link *is* the machine setup.
@@ -17,6 +18,30 @@ irm "loadout.vercel.app/api/script?p=go,git,vscode,ext-gitlens" | iex
 
 Or download the same thing as a `.ps1` and read it first. That is the
 recommended path, and the script says so in its own header.
+
+### On Debian or Ubuntu
+
+Add `&os=linux` and you get bash instead. The page has a Windows/Linux toggle
+that does the same thing.
+
+```bash
+sudo bash -c "$(curl -fsSL 'https://loadout.vercel.app/api/script?p=go,git,ext-gitlens&os=linux')"
+```
+
+The quotes around the URL are not optional. Without them the `&` inside `$( )`
+backgrounds the `curl`, `os=linux` runs as a shell assignment, and you get a
+**PowerShell** script handed to bash — silently, with no error.
+
+And it is `sudo bash -c "$(...)"`, never `curl ... | sudo bash`. The second form
+gives the script no controlling terminal, so any prompt — an apt confirmation, a
+sudo password — hangs forever with nothing printed.
+
+Not everything in the catalog has a Linux equivalent. Twelve of the sixty-two
+items do not: Docker Desktop and the WSL distros by nature, and a handful that
+ship only an AppImage, a `.deb` or a tarball. Those stay visible and selectable,
+get marked **Not available on Linux** on the card, are counted in a sidebar
+warning before you download, and are named by the script itself at runtime for
+anyone who never opened the page. They are never silently dropped.
 
 ## Screenshot
 

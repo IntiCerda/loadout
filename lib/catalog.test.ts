@@ -85,3 +85,54 @@ describe('packs resolve', () => {
     }
   })
 })
+
+describe('linux coverage', () => {
+  const winget = catalog.filter((item) => item.installer === 'winget')
+
+  /**
+   * Ids deliberately shipped with no Linux target. Every other `winget` item
+   * missing a `linux` ref is an oversight, not a decision, so this set is the
+   * only escape hatch and each entry carries its reason in `data/catalog.ts`.
+   *
+   * Two shapes, and the second is the larger one. `docker`, `powertoys` and
+   * `windows-terminal` have no Linux counterpart at all. The rest do have a
+   * Linux build -- it just ships as an AppImage, a .deb or a tarball, none of
+   * which the generator can install: `script_install` runs what it downloads
+   * with `bash`. Naming them as unavailable is the honest answer; inventing a
+   * ref that pipes a .deb into a shell is not.
+   */
+  const NO_LINUX_TARGET = new Set([
+    'docker',
+    'powertoys',
+    'windows-terminal',
+    'vscode',
+    'cursor',
+    'bruno',
+    'kubectl',
+    'k9s',
+    'lm-studio',
+  ])
+
+  it('declares a linux target or is deliberately windows-only', () => {
+    const missing = winget
+      .filter((item) => !item.linux && !NO_LINUX_TARGET.has(item.id))
+      .map((item) => item.id)
+    expect(missing).toEqual([])
+  })
+
+  it('keeps the exemption set honest -- real ids, and none of them targeted', () => {
+    for (const id of NO_LINUX_TARGET) {
+      const item = catalog.find((entry) => entry.id === id)
+      expect(item, `${id} is exempted but not in the catalog`).toBeDefined()
+      expect(item?.linux, `${id} is exempted yet declares a linux ref`).toBeUndefined()
+    }
+  })
+
+  it('uses https for every vendor install script', () => {
+    for (const item of catalog) {
+      if (item.linux?.installer === 'script') {
+        expect(item.linux.ref.startsWith('https://'), item.id).toBe(true)
+      }
+    }
+  })
+})

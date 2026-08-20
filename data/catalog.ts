@@ -26,10 +26,26 @@ import type { Item } from '@/lib/types'
  * MiB, which is the unit `formatSize` divides by 1024. For `font` items it is
  * the measured `Content-Length` of the zip.
  *
- * Only `winget` items may carry a `linux` ref. The five below are the seed set
- * and the rest are backfilled in Task 15; an item without one is skipped on the
- * Linux target rather than guessed at, and named in the generated script so the
- * omission is visible.
+ * Only `winget` items may carry a `linux` ref. An item without one is skipped
+ * on the Linux target rather than guessed at, and named in the generated script
+ * so the omission is visible.
+ *
+ * Every `linux` ref below was verified against Ubuntu 24.04 (noble):
+ *
+ *  - `apt`     -> published binary in noble on packages.ubuntu.com, confirmed
+ *                 against the Launchpad API for the exact version and component
+ *  - `script`  -> HTTP 200 and a `#!` first line, read to confirm the script
+ *                 installs the product this item names and not a sibling one
+ *
+ * Docker Desktop was not running, so no package was proved inside a real
+ * `ubuntu:24.04` container. The evidence above is archive metadata, which
+ * proves a package exists and is installable in principle, not that a specific
+ * `apt-get install` run succeeds end to end.
+ *
+ * Items with no Linux target carry a comment saying why. There are two shapes:
+ * no Linux product exists at all, or one exists but ships only as an AppImage,
+ * a `.deb` or a tarball -- none of which `script_install` can consume, since it
+ * runs the downloaded file with `bash`.
  */
 export const catalog: Item[] = [
   // --- languages ---
@@ -71,6 +87,10 @@ export const catalog: Item[] = [
     category: 'languages',
     installer: 'winget',
     ref: 'EclipseAdoptium.Temurin.21.JDK',
+    // Temurin ships no apt package and no install script -- only its own repo.
+    // OpenJDK 21 is the same Java 21 LTS from a different build, and it is in
+    // noble main.
+    linux: { installer: 'apt', ref: 'openjdk-21-jdk' },
     sizeMb: 190,
   },
   {
@@ -80,6 +100,11 @@ export const catalog: Item[] = [
     category: 'languages',
     installer: 'winget',
     ref: 'Rustlang.Rustup',
+    // apt, not https://sh.rustup.rs, even though that script is official:
+    // rustup-init asks for confirmation and `script_install` runs it with
+    // stdin on /dev/null, so it would abort rather than install. `rust-all`
+    // pulls rustc and cargo together and needs no terminal.
+    linux: { installer: 'apt', ref: 'rust-all' },
     sizeMb: 300,
     note: 'Needs the MSVC build tools to link on Windows.',
   },
@@ -90,6 +115,12 @@ export const catalog: Item[] = [
     category: 'languages',
     installer: 'winget',
     ref: 'Microsoft.DotNet.SDK.9',
+    // 8.0, not 9.0: noble publishes no dotnet-sdk-9.0 in any pocket. The
+    // alternative, Microsoft's dotnet-install.sh, unpacks into $HOME and adds
+    // nothing to PATH -- run as root that is /root/.dotnet, which the desktop
+    // user never sees. A supported LTS that works beats a matching version
+    // number that does not.
+    linux: { installer: 'apt', ref: 'dotnet-sdk-8.0' },
     sizeMb: 280,
   },
   {
@@ -100,6 +131,9 @@ export const catalog: Item[] = [
     category: 'languages',
     installer: 'winget',
     ref: 'DenoLand.Deno',
+    // No apt package in noble. The vendor script is the documented Linux
+    // install and is non-interactive.
+    linux: { installer: 'script', ref: 'https://deno.land/install.sh' },
     sizeMb: 40,
   },
   {
@@ -109,6 +143,8 @@ export const catalog: Item[] = [
     category: 'languages',
     installer: 'winget',
     ref: 'Oven-sh.Bun',
+    // No apt package in noble. This is the install line from bun's own docs.
+    linux: { installer: 'script', ref: 'https://bun.sh/install' },
     sizeMb: 55,
   },
 
@@ -120,12 +156,11 @@ export const catalog: Item[] = [
     category: 'editors',
     installer: 'winget',
     ref: 'Microsoft.VisualStudioCode',
-    // Deliberately no linux target yet. `code` is not in Debian's default
-    // repositories, and Microsoft publishes no install script either -- only a
-    // .deb download and an apt repo to add by hand. Neither fits `apt` or
-    // `script`, and piping a .deb into bash would be a command that cannot
-    // work. Task 15 owns the third mechanism; until then this is named as
-    // unavailable rather than emitted broken.
+    // No linux target. `code` is not in noble, and Microsoft publishes no
+    // install script either -- only a .deb download and an apt repo to add by
+    // hand. Neither fits `apt` or `script`, and `script_install` runs what it
+    // downloads with `bash`, so a .deb there would be piped into a shell.
+    // Named as unavailable rather than emitted broken.
     sizeMb: 350,
   },
   {
@@ -135,6 +170,7 @@ export const catalog: Item[] = [
     category: 'editors',
     installer: 'winget',
     ref: 'Neovim.Neovim',
+    linux: { installer: 'apt', ref: 'neovim' },
     sizeMb: 35,
   },
   {
@@ -144,6 +180,11 @@ export const catalog: Item[] = [
     category: 'editors',
     installer: 'winget',
     ref: 'Anysphere.Cursor',
+    // No linux target, though a Linux build exists. The editor ships as an
+    // AppImage, which `script_install` cannot run. https://cursor.com/install
+    // is a real shell script but it installs Cursor Agent, the terminal CLI --
+    // a different product from this item. Pointing at it would install
+    // something the user did not pick.
     sizeMb: 420,
   },
   {
@@ -153,6 +194,8 @@ export const catalog: Item[] = [
     category: 'editors',
     installer: 'winget',
     ref: 'ZedIndustries.Zed',
+    // Not in noble, but Zed's documented Linux install is a shell script.
+    linux: { installer: 'script', ref: 'https://zed.dev/install.sh' },
     sizeMb: 180,
   },
 
@@ -174,6 +217,9 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'GitHub.cli',
+    // In noble universe. GitHub's own apt repo carries a newer gh, but adding
+    // a third-party repo is a mechanism this generator does not have.
+    linux: { installer: 'apt', ref: 'gh' },
     sizeMb: 30,
   },
   {
@@ -183,6 +229,7 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'Microsoft.WindowsTerminal',
+    // No linux target: a Windows console host has no Linux counterpart.
     sizeMb: 120,
   },
   {
@@ -193,6 +240,7 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'Microsoft.PowerToys',
+    // No linux target: a bundle of Windows shell extensions.
     sizeMb: 250,
   },
   {
@@ -202,6 +250,7 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'jqlang.jq',
+    linux: { installer: 'apt', ref: 'jq' },
     sizeMb: 3,
   },
   {
@@ -211,6 +260,10 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'ezwinports.make',
+    // `make`, not `build-essential`. Both are in noble main and both provide
+    // make, but build-essential also pulls gcc, g++, libc6-dev and dpkg-dev --
+    // a compiler toolchain nobody asked for by ticking "GNU Make".
+    linux: { installer: 'apt', ref: 'make' },
     sizeMb: 2,
   },
   {
@@ -220,6 +273,7 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'BurntSushi.ripgrep.MSVC',
+    linux: { installer: 'apt', ref: 'ripgrep' },
     sizeMb: 5,
   },
   {
@@ -229,6 +283,9 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'sharkdp.fd',
+    // `fd-find`, not `fd` -- noble publishes no package called `fd`. The
+    // binary it installs is `fdfind`, renamed away from a prior clash.
+    linux: { installer: 'apt', ref: 'fd-find' },
     sizeMb: 4,
   },
   {
@@ -238,6 +295,9 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'sharkdp.bat',
+    // Package is `bat`; the binary it installs is `batcat`, renamed away from
+    // the `bacula-console-qt` clash.
+    linux: { installer: 'apt', ref: 'bat' },
     sizeMb: 5,
   },
   {
@@ -247,6 +307,7 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'eza-community.eza',
+    linux: { installer: 'apt', ref: 'eza' },
     sizeMb: 3,
   },
   {
@@ -256,6 +317,11 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: '7zip.7zip',
+    // `7zip`, and on 24.04 that is the real package: noble carries the
+    // upstream 7-Zip 23.01, while `p7zip-full` is now only a transitional stub
+    // pointing at it. The older advice to install `p7zip-full` was true for
+    // 22.04 and is stale here.
+    linux: { installer: 'apt', ref: '7zip' },
     sizeMb: 2,
   },
   {
@@ -265,6 +331,9 @@ export const catalog: Item[] = [
     category: 'tools',
     installer: 'winget',
     ref: 'Bruno.Bruno',
+    // No linux target, though a Linux build exists. Bruno ships .deb, .rpm,
+    // snap and AppImage, and publishes no install script -- nothing here fits
+    // `apt` or `script_install`.
     sizeMb: 130,
   },
   {
@@ -286,7 +355,10 @@ export const catalog: Item[] = [
     category: 'containers',
     installer: 'winget',
     ref: 'Docker.DockerDesktop',
-    // No `linux` ref: Docker Desktop is a Windows/macOS product. Skipped on Linux.
+    // No linux target: Docker Desktop is a Windows/macOS product, and this
+    // item requires the WSL distro. `docker.io` in noble and get.docker.com
+    // both install Docker Engine, which is a different thing from the desktop
+    // app this item names.
     requires: ['ubuntu'],
     sizeMb: 1400,
     note: 'Needs virtualization enabled in BIOS.',
@@ -298,6 +370,10 @@ export const catalog: Item[] = [
     category: 'containers',
     installer: 'winget',
     ref: 'Kubernetes.kubectl',
+    // No linux target, though kubectl is a first-class Linux binary. It is in
+    // no noble pocket, and upstream ships a bare binary from dl.k8s.io plus a
+    // third-party apt repo at pkgs.k8s.io -- there is no install script to
+    // point at. A ref here would have to be invented.
     sizeMb: 50,
   },
   {
@@ -307,6 +383,8 @@ export const catalog: Item[] = [
     category: 'containers',
     installer: 'winget',
     ref: 'Derailed.k9s',
+    // No linux target: not in noble, and upstream ships only .deb, .rpm and
+    // tarball release assets -- no install script.
     requires: ['kubectl'],
     sizeMb: 30,
   },
@@ -370,6 +448,11 @@ export const catalog: Item[] = [
     category: 'ai-apps',
     installer: 'winget',
     ref: 'ElementLabs.LMStudio',
+    // No linux target, though a Linux build exists. The desktop app ships as
+    // an AppImage. https://lmstudio.ai/install.sh is a real shell script but
+    // it installs the headless `llmster` daemon into $HOME -- a different
+    // product from the desktop app this item names, and under a root-run
+    // script it would land in /root.
     sizeMb: 550,
   },
 
