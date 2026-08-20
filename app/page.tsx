@@ -18,7 +18,7 @@ import { ScriptPreview } from "@/components/script-preview";
  * themselves. A custom name rather than a synthetic `popstate`, which the App
  * Router also listens for.
  */
-const SELECTION_EVENT = "pila:selection";
+const SELECTION_EVENT = "loadout:selection";
 
 function subscribeToUrl(onChange: () => void) {
   window.addEventListener("popstate", onChange);

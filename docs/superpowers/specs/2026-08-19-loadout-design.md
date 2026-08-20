@@ -1,4 +1,4 @@
-# Pila — Design Spec
+# Loadout — Design Spec
 
 **Date:** 2026-08-19
 **Status:** Approved (pending name confirmation)
@@ -209,7 +209,7 @@ The bash generator's hard contract mirrors the PowerShell one:
 
 ## Open Decision
 
-**Name.** Working name is `Pila` ("stack" in Spanish). It appears in exactly
+**Name.** Working name is `Loadout` ("stack" in Spanish). It appears in exactly
 one constant (`lib/brand.ts`), the page metadata, and the README — changing it
 is a find-and-replace, not a refactor. Alternatives considered: `StackForge`,
 `winup`.
@@ -218,5 +218,5 @@ is a find-and-replace, not a refactor. Alternatives considered: `StackForge`,
 
 The predecessor repo's three hardcoded scripts become the seed content for the
 five launch packs. That repo stays as-is; its README one-liners keep working.
-Pila is a new repository so the Vercel project deploys from a clean root and
+Loadout is a new repository so the Vercel project deploys from a clean root and
 the portfolio piece carries its own name.

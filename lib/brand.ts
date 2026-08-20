@@ -1,4 +1,4 @@
-export const BRAND = 'Pila'
-export const TAGLINE = 'Pick your stack. Get one script.'
+export const BRAND = 'Loadout'
+export const TAGLINE = 'Pick your stack. Get the recipe.'
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://pila.vercel.app'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://loadout.vercel.app'

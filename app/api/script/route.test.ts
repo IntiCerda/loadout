@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { GET } from './route'
 
-const call = (query: string) => GET(new Request(`https://pila.test/api/script${query}`))
+const call = (query: string) => GET(new Request(`https://loadout.test/api/script${query}`))
 
 describe('GET /api/script', () => {
   it('serves text/plain so irm | iex works', async () => {
@@ -42,7 +42,7 @@ describe('GET /api/script', () => {
     // runtime here; deriving from the request is what keeps the previewed and
     // the delivered script byte-identical after an env change or on a preview
     // deployment.
-    expect(body).toContain('https://pila.test/?p=git')
+    expect(body).toContain('https://loadout.test/?p=git')
   })
 
   it('merges repeated p parameters instead of letting the first one win', async () => {

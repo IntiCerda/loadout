@@ -1,14 +1,14 @@
 @AGENTS.md
 
-# Pila
+# Loadout
 
 Ninite for Windows developers. Pick tools, extensions, fonts, global packages
 and local AI models from a catalog; get one readable install script.
 
 **The implementation plan is the source of truth:**
-`docs/superpowers/plans/2026-08-19-pila.md`. Read the task you are on and the
+`docs/superpowers/plans/2026-08-19-loadout.md`. Read the task you are on and the
 Global Constraints section before writing anything. The design spec is
-`docs/superpowers/specs/2026-08-19-pila-design.md`.
+`docs/superpowers/specs/2026-08-19-loadout-design.md`.
 
 ## Stack facts that differ from training data
 
