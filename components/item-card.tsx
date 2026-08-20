@@ -122,7 +122,9 @@ export function ItemCard({
                 img.style.display = "none";
               }
             }}
-            className="bg-muted absolute inset-0 size-[34px] rounded-[9px] object-contain"
+            className={`absolute inset-0 size-[34px] rounded-[9px] object-contain ${
+              item.logoOnLight ? "bg-foreground p-[3px]" : "bg-muted"
+            }`}
           />
         </span>
 

@@ -278,6 +278,7 @@ export const catalog: Item[] = [
   },
   {
     id: 'fd',
+    logoOnLight: true,
     name: 'fd',
     description: 'Fast, ergonomic replacement for find.',
     category: 'tools',
@@ -378,6 +379,7 @@ export const catalog: Item[] = [
   },
   {
     id: 'k9s',
+    logoOnLight: true,
     name: 'k9s',
     description: 'Terminal UI for browsing and debugging a Kubernetes cluster.',
     category: 'containers',

@@ -119,10 +119,6 @@
     "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg",
     "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
   },
-  "aider": {
-    "source": "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/assets/logo.svg",
-    "license": "Aider logo from the Aider-AI/aider repo (Apache-2.0)"
-  },
   "lm-studio": {
     "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/lmstudio.svg",
     "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"

@@ -86,6 +86,14 @@ export type Item = {
    * worse than no chip row.
    */
   provider?: string
+  /**
+   * Render the logo on a light plate. Only for marks the vendor drew for a
+   * light background -- k9s is a black dog, fd is dark grey folders, and both
+   * vanish on the slate card. It is a per-item fact, not a rule: Docker's
+   * white whale disappears on a light plate, so this must never be inferred.
+   * The mark itself is never recoloured.
+   */
+  logoOnLight?: boolean
   /** Approximate download size in megabytes. */
   sizeMb?: number
   /** Shown in the UI only. Never emitted into the script. */
