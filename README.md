@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Loadout
 
-## Getting Started
+**Pick your stack. Get the recipe.**
 
-First, run the development server:
+Loadout is Ninite for Windows developers: tick apps, VS Code extensions, fonts,
+global packages and local AI models out of a curated catalog, and get back one
+readable PowerShell script that installs all of it.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+There is no installer to trust, no account, and no database. The selection
+lives in the query string, so a link *is* the machine setup.
+
+## The one-liner
+
+```powershell
+irm "loadout.vercel.app/api/script?p=go,git,vscode,ext-gitlens" | iex
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or download the same thing as a `.ps1` and read it first. That is the
+recommended path, and the script says so in its own header.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Screenshot
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> **TODO — screenshot missing.** This placeholder is deliberate: no real
+> capture of the running app was available when this file was written, and a
+> mocked-up image would be a lie about what ships. Replace this block with
+> `![Loadout](docs/screenshot.png)` after taking a 1440px-wide capture of
+> `http://localhost:3000` with a pack applied.
 
-## Learn More
+## The generated script is readable by design
 
-To learn more about Next.js, take a look at the following resources:
+Nothing about the output is obfuscated, minified, or fetched at runtime. The
+whole point of the project is that you can read the thing before you run it,
+and the generator is built so that reading it is actually worth something:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **One admin gate first.** If the shell is not elevated it prints how to fix
+  that and returns. It never calls `exit` — under `irm | iex` that would close
+  the user's console — and it never declares `param()`, which `iex` rejects
+  outright.
+- **Preflights only for what you picked.** A `winget` selection checks that
+  `winget` exists and points Windows 10 users at App Installer. A WSL
+  selection checks for build 19041+. A models-only run gets neither.
+- **A transcript.** Everything is logged to `%TEMP%\setup-<timestamp>.log`.
+- **One helper function per installer**, emitted only if that installer is
+  used. Every helper checks whether the thing is already installed and skips
+  it, so the script is safe to run twice.
+- **Phases in dependency order**: `winget`, then WSL distros, fonts, VS Code
+  extensions, npm globals, pipx packages, and Ollama model pulls last. `PATH`
+  is refreshed in-session right after the `winget` phase, which is what lets
+  the later phases find `code`, `npm` and `ollama` that `winget` installed
+  seconds earlier. Models go last because they are the largest downloads —
+  interrupt the script and everything else is already usable.
+- **ASCII only.** No box drawing, no emoji, no accents. `irm | iex` decoding of
+  non-ASCII is unreliable, so the emitter strips anything outside printable
+  ASCII rather than trusting the catalog to behave.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## The catalog is the allowlist
 
-## Deploy on Vercel
+This is the security model, and it is worth stating plainly: **no string from
+the query string ever reaches the generated script.**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`?p=go,git,vscode` is not a list of things to install. It is a list of lookup
+keys. `lib/url.ts` bounds and validates them, `lib/resolve.ts` looks each one
+up in `data/catalog.ts` and **silently drops anything it does not recognise**,
+and `lib/generate.ts` emits only the fields of the catalog entries that
+survived. An id nobody wrote into `data/catalog.ts` cannot produce a single
+character of output.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The second layer is for the catalog itself, because the catalog takes pull
+requests. Every value emitted into PowerShell goes out as a single-quoted
+literal with apostrophes doubled — single-quoted strings interpolate nothing,
+so `$`, a backtick and a double quote are all inert inside one. Values that
+land in a comment get the same treatment, so a newline in a name cannot end
+the comment early and run as code. Font ids are additionally reduced to
+`[a-zA-Z0-9-]` before they reach `Join-Path`, which does not normalise `..`.
+
+None of this is theoretical: a `ref` containing a double quote was a working
+code-execution bug in an earlier revision, found by running the output instead
+of reading it.
+
+## Adding a catalog item
+
+Catalog entries live in `data/catalog.ts` and are plain data. Add one object:
+
+```ts
+{
+  id: 'ripgrep',
+  name: 'ripgrep',
+  description: 'Recursive regex search that respects gitignore.',
+  category: 'tools',
+  installer: 'winget',
+  ref: 'BurntSushi.ripgrep.MSVC',
+  sizeMb: 5,
+}
+```
+
+Two rules matter more than the rest:
+
+1. **`id` is permanent.** It appears in every link anyone has ever shared.
+   Renaming one silently breaks those links, because `resolve` drops ids it
+   does not know.
+2. **Verify the `ref` against the real registry before you commit it.** For
+   `winget` that is `winget search --id <ref> --exact`. An invented package id
+   is worse than a missing item — it becomes a failing command in somebody's
+   elevated shell.
+
+`CONTRIBUTING.md` has the full rules, and `lib/catalog.test.ts` enforces the
+mechanical half of them.
+
+## Local development
+
+```bash
+npm install
+npm run dev     # http://localhost:3000
+npm test        # vitest, the whole suite
+npm run lint    # eslint, must be 0 errors
+npm run build   # next build
+```
+
+### Where things live
+
+| Path | Responsibility |
+|---|---|
+| `data/catalog.ts` | The catalog. Data only, and the allowlist. |
+| `data/packs.ts` | Curated packs referencing catalog ids. Data only. |
+| `lib/url.ts` | Parses `?p=`. The trust boundary — validates and caps input. |
+| `lib/resolve.ts` | Expands `requires` transitively, dedupes, sums size. |
+| `lib/generate.ts` | Emits the PowerShell. Owns helpers and phase order. |
+| `lib/brand.ts` | Brand name and canonical URL. One constant each. |
+| `app/api/script/route.ts` | Serves the script as `text/plain` or a `.ps1`. |
+
+Built with Next.js 16, TypeScript, Tailwind v4 and shadcn/ui on Base UI.
+Deployed on Vercel.

@@ -1,14 +1,37 @@
 import type { Item } from '@/lib/types'
 
 /**
- * Seed catalog. Covers 7 of the 8 installers; `claude-plugin` is deliberately
- * absent until a marketplace ref is verified against the real CLI, because a
- * catalog entry becomes an install command someone runs as root.
+ * The launch catalog. Data only -- no logic lives here.
  *
- * Three `linux` refs below are provisional: `code` needs Microsoft's apt repo
- * and `ollama` has no apt package at all (it ships a curl installer). Both are
- * corrected to `{ installer: 'script' }` in Task 14, which is where that
- * variant is introduced.
+ * Every entry becomes a command that runs in an elevated shell, so every `ref`
+ * was resolved against the real registry before it landed:
+ *
+ *  - `winget`  -> `winget search --id <ref> --exact`
+ *  - `vscode`  -> HTTP 200 on marketplace.visualstudio.com/items?itemName=<ref>
+ *  - `npm`     -> `npm view <ref> version`
+ *  - `pipx`    -> pypi.org/pypi/<ref>/json
+ *  - `ollama`  -> registry.ollama.ai manifest for that exact tag
+ *  - `font`    -> HTTP 200 on a HEAD request for the zip
+ *  - `wsl`     -> present in `wsl --list --online`
+ *
+ * `claude-plugin` is still deliberately absent. `claude plugin install <name>`
+ * is real -- verified against the installed CLI -- but it only resolves plugins
+ * from marketplaces the machine has already added with
+ * `claude plugin marketplace add <source>`, which a fresh machine has not. A
+ * one-shot `claude plugin install x@y` therefore fails on every clean box, so
+ * shipping one would be shipping a line that cannot work.
+ *
+ * `sizeMb` is an approximate download size. For `ollama` items it is not
+ * approximate: it is the summed layer size of that exact tag's manifest, in
+ * MiB, which is the unit `formatSize` divides by 1024. For `font` items it is
+ * the measured `Content-Length` of the zip.
+ *
+ * Only `winget` items may carry a `linux` ref. The six below are the seed set
+ * and the rest are backfilled in Task 15; an item without one is skipped on the
+ * Linux target rather than guessed at. Two of the six are provisional: `code`
+ * needs Microsoft's apt repo and `ollama` has no apt package at all (it ships a
+ * curl installer). Both become `{ installer: 'script' }` in Task 14, where that
+ * variant lands.
  */
 export const catalog: Item[] = [
   // --- languages ---
@@ -43,16 +66,52 @@ export const catalog: Item[] = [
     linux: { installer: 'apt', ref: 'python3.12' },
     sizeMb: 110,
   },
-
   {
-    id: 'ruff',
-    name: 'Ruff',
-    description: 'Fast Python linter and formatter.',
+    id: 'java',
+    name: 'Java 21 (Temurin)',
+    description: 'Eclipse Temurin JDK 21, the current long-term-support Java.',
     category: 'languages',
-    installer: 'pipx',
-    ref: 'ruff',
-    requires: ['python'],
-    sizeMb: 25,
+    installer: 'winget',
+    ref: 'EclipseAdoptium.Temurin.21.JDK',
+    sizeMb: 190,
+  },
+  {
+    id: 'rust',
+    name: 'Rust',
+    description: 'The Rust toolchain, managed by rustup.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'Rustlang.Rustup',
+    sizeMb: 300,
+    note: 'Needs the MSVC build tools to link on Windows.',
+  },
+  {
+    id: 'dotnet',
+    name: '.NET SDK 9',
+    description: 'The .NET SDK and runtime for C# and F#.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'Microsoft.DotNet.SDK.9',
+    sizeMb: 280,
+  },
+  {
+    id: 'deno',
+    name: 'Deno',
+    description:
+      'Secure TypeScript runtime with a batteries-included toolchain.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'DenoLand.Deno',
+    sizeMb: 40,
+  },
+  {
+    id: 'bun',
+    name: 'Bun',
+    description: 'Fast JavaScript runtime, bundler and package manager.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'Oven-sh.Bun',
+    sizeMb: 55,
   },
 
   // --- editors ---
@@ -66,6 +125,33 @@ export const catalog: Item[] = [
     linux: { installer: 'apt', ref: 'code' },
     sizeMb: 350,
   },
+  {
+    id: 'neovim',
+    name: 'Neovim',
+    description: 'Modal terminal editor configured in Lua.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'Neovim.Neovim',
+    sizeMb: 35,
+  },
+  {
+    id: 'cursor',
+    name: 'Cursor',
+    description: 'VS Code fork built around an AI pair programmer.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'Anysphere.Cursor',
+    sizeMb: 420,
+  },
+  {
+    id: 'zed',
+    name: 'Zed',
+    description: 'High-performance collaborative editor written in Rust.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'ZedIndustries.Zed',
+    sizeMb: 180,
+  },
 
   // --- tools ---
   {
@@ -77,6 +163,116 @@ export const catalog: Item[] = [
     ref: 'Git.Git',
     linux: { installer: 'apt', ref: 'git' },
     sizeMb: 65,
+  },
+  {
+    id: 'gh',
+    name: 'GitHub CLI',
+    description: 'Pull requests, issues and releases from the terminal.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'GitHub.cli',
+    sizeMb: 30,
+  },
+  {
+    id: 'windows-terminal',
+    name: 'Windows Terminal',
+    description: 'Tabbed terminal host with GPU-accelerated rendering.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Microsoft.WindowsTerminal',
+    sizeMb: 120,
+  },
+  {
+    id: 'powertoys',
+    name: 'PowerToys',
+    description:
+      'Window management, a launcher and a colour picker for Windows.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Microsoft.PowerToys',
+    sizeMb: 250,
+  },
+  {
+    id: 'jq',
+    name: 'jq',
+    description: 'Command-line JSON processor.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'jqlang.jq',
+    sizeMb: 3,
+  },
+  {
+    id: 'make',
+    name: 'GNU Make',
+    description: 'The build tool every Makefile in the wild expects.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'ezwinports.make',
+    sizeMb: 2,
+  },
+  {
+    id: 'ripgrep',
+    name: 'ripgrep',
+    description: 'Recursive regex search that respects gitignore.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'BurntSushi.ripgrep.MSVC',
+    sizeMb: 5,
+  },
+  {
+    id: 'fd',
+    name: 'fd',
+    description: 'Fast, ergonomic replacement for find.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'sharkdp.fd',
+    sizeMb: 4,
+  },
+  {
+    id: 'bat',
+    name: 'bat',
+    description: 'A cat clone with syntax highlighting and git integration.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'sharkdp.bat',
+    sizeMb: 5,
+  },
+  {
+    id: 'eza',
+    name: 'eza',
+    description: 'Modern ls with colours, icons and a tree view.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'eza-community.eza',
+    sizeMb: 3,
+  },
+  {
+    id: '7zip',
+    name: '7-Zip',
+    description: 'Archiver that opens every format you will be handed.',
+    category: 'tools',
+    installer: 'winget',
+    ref: '7zip.7zip',
+    sizeMb: 2,
+  },
+  {
+    id: 'bruno',
+    name: 'Bruno',
+    description: 'Offline API client whose collections live in your repository.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Bruno.Bruno',
+    sizeMb: 130,
+  },
+  {
+    id: 'ruff',
+    name: 'Ruff',
+    description: 'Fast Python linter and formatter.',
+    category: 'tools',
+    installer: 'pipx',
+    ref: 'ruff',
+    requires: ['python'],
+    sizeMb: 25,
   },
 
   // --- containers ---
@@ -91,6 +287,25 @@ export const catalog: Item[] = [
     requires: ['ubuntu'],
     sizeMb: 1400,
     note: 'Needs virtualization enabled in BIOS.',
+  },
+  {
+    id: 'kubectl',
+    name: 'kubectl',
+    description: 'The Kubernetes command-line client.',
+    category: 'containers',
+    installer: 'winget',
+    ref: 'Kubernetes.kubectl',
+    sizeMb: 50,
+  },
+  {
+    id: 'k9s',
+    name: 'k9s',
+    description: 'Terminal UI for browsing and debugging a Kubernetes cluster.',
+    category: 'containers',
+    installer: 'winget',
+    ref: 'Derailed.k9s',
+    requires: ['kubectl'],
+    sizeMb: 30,
   },
 
   // --- ai apps ---
@@ -114,6 +329,45 @@ export const catalog: Item[] = [
     requires: ['node'],
     sizeMb: 90,
   },
+  {
+    id: 'codex-cli',
+    name: 'Codex CLI',
+    description: 'OpenAI coding agent in the terminal.',
+    category: 'ai-apps',
+    installer: 'npm',
+    ref: '@openai/codex',
+    requires: ['node'],
+    sizeMb: 80,
+  },
+  {
+    id: 'gemini-cli',
+    name: 'Gemini CLI',
+    description: 'Google coding agent in the terminal.',
+    category: 'ai-apps',
+    installer: 'npm',
+    ref: '@google/gemini-cli',
+    requires: ['node'],
+    sizeMb: 70,
+  },
+  {
+    id: 'aider',
+    name: 'Aider',
+    description: 'Pair programming with an LLM against your git history.',
+    category: 'ai-apps',
+    installer: 'pipx',
+    ref: 'aider-chat',
+    requires: ['python'],
+    sizeMb: 120,
+  },
+  {
+    id: 'lm-studio',
+    name: 'LM Studio',
+    description: 'Desktop app for running and serving local models.',
+    category: 'ai-apps',
+    installer: 'winget',
+    ref: 'ElementLabs.LMStudio',
+    sizeMb: 550,
+  },
 
   // --- ai models ---
   {
@@ -124,7 +378,67 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'qwen2.5-coder:7b',
     requires: ['ollama'],
-    sizeMb: 4700,
+    sizeMb: 4466,
+  },
+  {
+    id: 'qwen2.5-coder-14b',
+    name: 'Qwen2.5 Coder 14B',
+    description: 'The larger Qwen coder, for machines with the VRAM to spare.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'qwen2.5-coder:14b',
+    requires: ['ollama'],
+    sizeMb: 8572,
+  },
+  {
+    id: 'llama3.1-8b',
+    name: 'Llama 3.1 8B',
+    description: 'Meta general-purpose model with a long context window.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'llama3.1:8b',
+    requires: ['ollama'],
+    sizeMb: 4693,
+  },
+  {
+    id: 'mistral-7b',
+    name: 'Mistral 7B',
+    description: 'Compact general model that runs on modest hardware.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'mistral:7b',
+    requires: ['ollama'],
+    sizeMb: 4170,
+  },
+  {
+    id: 'granite3.3-8b',
+    name: 'Granite 3.3 8B',
+    description: 'IBM instruction-tuned model with a permissive licence.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'granite3.3:8b',
+    requires: ['ollama'],
+    sizeMb: 4714,
+  },
+  {
+    id: 'gemma2-9b',
+    name: 'Gemma 2 9B',
+    description: 'Google open model tuned for instruction following.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'gemma2:9b',
+    requires: ['ollama'],
+    sizeMb: 5191,
+  },
+  {
+    id: 'deepseek-coder-v2-16b',
+    name: 'DeepSeek Coder V2 16B',
+    description: 'Mixture-of-experts coding model with broad language coverage.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'deepseek-coder-v2:16b',
+    requires: ['ollama'],
+    sizeMb: 8493,
   },
   {
     id: 'nomic-embed-text',
@@ -134,7 +448,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'nomic-embed-text',
     requires: ['ollama'],
-    sizeMb: 274,
+    sizeMb: 262,
   },
 
   // --- extensions ---
@@ -158,7 +472,6 @@ export const catalog: Item[] = [
     requires: ['vscode', 'ollama'],
     sizeMb: 30,
   },
-
   {
     id: 'ext-eslint',
     name: 'ESLint',
@@ -179,6 +492,97 @@ export const catalog: Item[] = [
     requires: ['vscode'],
     sizeMb: 10,
   },
+  {
+    id: 'ext-python',
+    name: 'Python',
+    description:
+      'Python language support, debugging and environment selection.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ms-python.python',
+    requires: ['vscode'],
+    sizeMb: 45,
+  },
+  {
+    id: 'ext-docker',
+    name: 'Docker',
+    description: 'Dockerfile and compose editing with container management.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ms-azuretools.vscode-docker',
+    requires: ['vscode'],
+    sizeMb: 20,
+  },
+  {
+    id: 'ext-go',
+    name: 'Go',
+    description: 'Go language server, debugging and test running in VS Code.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'golang.go',
+    requires: ['vscode'],
+    sizeMb: 18,
+  },
+  {
+    id: 'ext-rust-analyzer',
+    name: 'rust-analyzer',
+    description: 'The official Rust language server for VS Code.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'rust-lang.rust-analyzer',
+    requires: ['vscode'],
+    sizeMb: 40,
+  },
+  {
+    id: 'ext-mongodb',
+    name: 'MongoDB',
+    description: 'Browse collections and run playgrounds against MongoDB.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'mongodb.mongodb-vscode',
+    requires: ['vscode'],
+    sizeMb: 25,
+  },
+  {
+    id: 'ext-rest-client',
+    name: 'REST Client',
+    description: 'Send HTTP requests from a plain .http file.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'humao.rest-client',
+    requires: ['vscode'],
+    sizeMb: 8,
+  },
+  {
+    id: 'ext-editorconfig',
+    name: 'EditorConfig',
+    description: 'Apply the repository .editorconfig to the editor.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'EditorConfig.EditorConfig',
+    requires: ['vscode'],
+    sizeMb: 2,
+  },
+  {
+    id: 'ext-error-lens',
+    name: 'Error Lens',
+    description: 'Render diagnostics inline instead of on hover.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'usernamehw.errorlens',
+    requires: ['vscode'],
+    sizeMb: 3,
+  },
+  {
+    id: 'ext-tailwind',
+    name: 'Tailwind CSS IntelliSense',
+    description: 'Class completion and linting for Tailwind CSS.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'bradlc.vscode-tailwindcss',
+    requires: ['vscode'],
+    sizeMb: 10,
+  },
 
   // --- fonts ---
   {
@@ -188,7 +592,35 @@ export const catalog: Item[] = [
     category: 'fonts',
     installer: 'font',
     ref: 'https://download.jetbrains.com/fonts/JetBrainsMono-2.304.zip',
-    sizeMb: 8,
+    sizeMb: 6,
+  },
+  {
+    id: 'font-fira-code',
+    name: 'Fira Code',
+    description: 'Monospace typeface known for its ligature set.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://github.com/tonsky/FiraCode/releases/download/6.2/Fira_Code_v6.2.zip',
+    sizeMb: 3,
+  },
+  {
+    id: 'font-cascadia-code',
+    name: 'Cascadia Code',
+    description: 'The Microsoft terminal typeface, ligatures included.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://github.com/microsoft/cascadia-code/releases/download/v2407.24/CascadiaCode-2407.24.zip',
+    sizeMb: 144,
+  },
+  {
+    id: 'font-jetbrains-mono-nerd',
+    name: 'JetBrainsMono Nerd Font',
+    description: 'JetBrains Mono patched with the Nerd Fonts icon set.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip',
+    sizeMb: 124,
+    note: 'Supplies the glyphs that starship, eza and lazygit render.',
   },
 
   // --- linux ---
@@ -201,5 +633,23 @@ export const catalog: Item[] = [
     ref: 'Ubuntu',
     sizeMb: 500,
     note: 'Requires a reboot on a machine where WSL was not enabled.',
+  },
+  {
+    id: 'debian',
+    name: 'Debian (WSL2)',
+    description: 'Debian GNU/Linux on the Windows Subsystem for Linux.',
+    category: 'linux',
+    installer: 'wsl',
+    ref: 'Debian',
+    sizeMb: 420,
+  },
+  {
+    id: 'archlinux',
+    name: 'Arch Linux (WSL2)',
+    description: 'Arch Linux on the Windows Subsystem for Linux.',
+    category: 'linux',
+    installer: 'wsl',
+    ref: 'archlinux',
+    sizeMb: 350,
   },
 ]
