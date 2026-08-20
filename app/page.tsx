@@ -177,6 +177,10 @@ export default function Page() {
         <PackChips packs={packs} selectedIds={selectedSet} onApply={applyPack} />
       </div>
 
+      <div className="mb-8">
+        <ScriptPreview script={script} os={os} />
+      </div>
+
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
         <CatalogGrid
           items={catalog}
@@ -193,9 +197,7 @@ export default function Page() {
           origin={origin}
           os={os}
           onOsChange={setOs}
-        >
-          <ScriptPreview script={script} os={os} />
-        </KitSidebar>
+        />
       </div>
     </main>
   );

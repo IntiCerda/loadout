@@ -23,7 +23,6 @@ type Props = {
   origin: string;
   os: Os;
   onOsChange: (os: Os) => void;
-  children?: React.ReactNode;
 };
 
 type CopyStatus = "idle" | "copied" | "failed";
@@ -45,7 +44,6 @@ export function KitSidebar({
   origin,
   os,
   onOsChange,
-  children,
 }: Props) {
   const [status, setStatus] = useState<CopyStatus>("idle");
   const empty = items.length === 0;
@@ -223,7 +221,6 @@ export function KitSidebar({
             : ""}
         </p>
 
-        {children}
       </div>
     </aside>
   );

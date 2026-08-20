@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, FileCode2 } from "lucide-react";
 import type { Os } from "@/lib/types";
 
 /**
@@ -96,18 +96,26 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
   const lineCount = useMemo(() => script.split("\n").length, [script]);
 
   return (
-    <div className="border-border mt-5 border-t pt-4">
+    // Full width, not inside the 320px sidebar. The generated PowerShell has
+    // lines up to about 80 characters; at 12px mono that needs roughly 620px,
+    // and the sidebar gave it 280. Every real line was clipped, so the one
+    // feature this product is built around -- read it before you run it -- was
+    // rendered in a column too narrow to read it in.
+    <div className="border-border bg-primary rounded-xl border p-4 sm:p-5">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-controls="script-body"
         className="hover:text-accent focus-visible:outline-ring flex min-h-[44px] w-full
-          cursor-pointer items-center justify-between gap-2 rounded-lg px-1 text-left
-          text-sm font-medium transition-colors duration-200
+          cursor-pointer items-center justify-between gap-3 rounded-lg px-1 text-left
+          font-medium transition-colors duration-200
           focus-visible:outline-2 focus-visible:outline-offset-2"
       >
-        <span>{open ? "Hide script" : "View script"}</span>
+        <span className="flex items-center gap-2">
+          <FileCode2 className="text-accent size-4 shrink-0" aria-hidden />
+          {open ? "Hide the generated script" : "View the generated script"}
+        </span>
         <span className="text-foreground/50 flex items-center gap-2 font-mono text-xs">
           {lineCount} lines
           <ChevronDown
@@ -129,7 +137,7 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
           tabIndex={0}
           role="region"
           aria-label={`Generated ${os === "linux" ? "bash" : "PowerShell"} script`}
-          className="border-border bg-background focus-visible:outline-ring mt-2 max-h-[60vh]
+          className="border-border bg-background focus-visible:outline-ring mt-3 max-h-[70vh]
             overflow-auto rounded-lg border p-4 font-mono text-xs leading-relaxed
             focus-visible:outline-2 focus-visible:-outline-offset-2"
         >

@@ -53,11 +53,13 @@ before the download starts.
 
 ![The generated PowerShell, rendered live as you select](docs/screenshot-script.png)
 
+Expand the panel and the generated script is right there, re-rendered on every
+tick, at a width where you can actually read it. It is byte-for-byte what
+`/api/script` serves — asserted by a test, not assumed.
+
 Selecting a VS Code extension pulls VS Code in as **Required by your
-selection** — locked, still keyboard-reachable, and announced as unavailable
-rather than silently skipped. The panel on the right is the generated
-PowerShell, re-rendered on every tick. It is byte-for-byte what `/api/script`
-serves, which is asserted by a test rather than assumed.
+selection**: locked, still keyboard-reachable, and announced as unavailable
+rather than silently skipped.
 
 Captured from a production build at 1440x900.
 
