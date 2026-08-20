@@ -26,12 +26,10 @@ import type { Item } from '@/lib/types'
  * MiB, which is the unit `formatSize` divides by 1024. For `font` items it is
  * the measured `Content-Length` of the zip.
  *
- * Only `winget` items may carry a `linux` ref. The six below are the seed set
+ * Only `winget` items may carry a `linux` ref. The five below are the seed set
  * and the rest are backfilled in Task 15; an item without one is skipped on the
- * Linux target rather than guessed at. Two of the six are provisional: `code`
- * needs Microsoft's apt repo and `ollama` has no apt package at all (it ships a
- * curl installer). Both become `{ installer: 'script' }` in Task 14, where that
- * variant lands.
+ * Linux target rather than guessed at, and named in the generated script so the
+ * omission is visible.
  */
 export const catalog: Item[] = [
   // --- languages ---
@@ -122,7 +120,12 @@ export const catalog: Item[] = [
     category: 'editors',
     installer: 'winget',
     ref: 'Microsoft.VisualStudioCode',
-    linux: { installer: 'apt', ref: 'code' },
+    // Deliberately no linux target yet. `code` is not in Debian's default
+    // repositories, and Microsoft publishes no install script either -- only a
+    // .deb download and an apt repo to add by hand. Neither fits `apt` or
+    // `script`, and piping a .deb into bash would be a command that cannot
+    // work. Task 15 owns the third mechanism; until then this is named as
+    // unavailable rather than emitted broken.
     sizeMb: 350,
   },
   {
@@ -316,7 +319,8 @@ export const catalog: Item[] = [
     category: 'ai-apps',
     installer: 'winget',
     ref: 'Ollama.Ollama',
-    linux: { installer: 'apt', ref: 'ollama' },
+    // No apt package exists at all; this is the vendor's own install script.
+    linux: { installer: 'script', ref: 'https://ollama.com/install.sh' },
     sizeMb: 700,
   },
   {

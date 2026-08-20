@@ -3,6 +3,7 @@ export type Os = 'windows' | 'linux'
 export type Installer =
   | 'winget'
   | 'apt'
+  | 'script'
   | 'vscode'
   | 'npm'
   | 'pipx'
@@ -48,6 +49,12 @@ export type Item = {
   /**
    * Linux equivalent, required only when `installer` is `winget`.
    *
+   * `apt` means the package is in Debian/Ubuntu default repositories and
+   * installs with a plain `apt-get install`. `script` means the vendor
+   * publishes an official install script and `ref` is its https URL — the only
+   * honest option for tools that ship no distro package at all, Ollama being
+   * the first of them.
+   *
    * Items on a PORTABLE_INSTALLERS installer work on Linux as-is and must
    * leave this undefined. A `winget` item that omits it has no Linux
    * counterpart and is skipped for that target — as are all `wsl` items,
@@ -57,7 +64,9 @@ export type Item = {
    * Phase 5 and is cheap; backfilling this across 80 catalog entries later
    * would not be.
    */
-  linux?: { installer: 'apt'; ref: string }
+  linux?:
+    | { installer: 'apt'; ref: string }
+    | { installer: 'script'; ref: string }
   /**
    * Ids of items that must be included whenever this one is selected.
    *

@@ -56,4 +56,32 @@ describe('GET /api/script', () => {
     expect(res.status).toBe(200)
     expect(await res.text()).toContain('Nothing selected')
   })
+
+  it('serves bash when os=linux', async () => {
+    const body = await (await call('?p=git&os=linux')).text()
+    expect(body.startsWith('#!/usr/bin/env bash')).toBe(true)
+  })
+
+  it('serves powershell by default, so existing links keep working', async () => {
+    const body = await (await call('?p=git')).text()
+    expect(body).toContain('Install-WingetPackage')
+    expect(body).not.toContain('#!/usr/bin/env bash')
+  })
+
+  it('serves powershell for any os value that is not exactly linux', async () => {
+    // The parameter is a switch, not a parser. A typo must not silently
+    // produce a script for the wrong platform.
+    const body = await (await call('?p=git&os=Linux')).text()
+    expect(body).toContain('Install-WingetPackage')
+  })
+
+  it('names the linux download .sh', async () => {
+    const res = await call('?p=git&os=linux&download=1')
+    expect(res.headers.get('content-disposition')).toContain('.sh')
+  })
+
+  it('carries os=linux into the share url, so the header links back to bash', async () => {
+    const body = await (await call('?p=git&os=linux')).text()
+    expect(body).toContain('https://loadout.test/?p=git&os=linux')
+  })
 })

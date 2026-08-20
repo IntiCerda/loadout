@@ -1,10 +1,11 @@
 import { catalog } from '@/data/catalog'
 import { BRAND, SITE_URL } from '@/lib/brand'
 import { generateScript } from '@/lib/generate'
+import { generateBash } from '@/lib/generate-linux'
 import { resolve } from '@/lib/resolve'
 import { parseIds, serializeIds } from '@/lib/url'
 
-const FILENAME = `${BRAND.toLowerCase()}-setup.ps1`
+const FILENAME = `${BRAND.toLowerCase()}-setup`
 
 export function GET(req: Request): Response {
   const url = new URL(req.url)
@@ -27,8 +28,17 @@ export function GET(req: Request): Response {
   // Built from resolved ids, not from the raw query — the script always links
   // back to a selection that actually exists in the catalog. This is what keeps
   // query-string input out of the generated script entirely.
-  const shareUrl = `${origin}/?p=${serializeIds(items.map((item) => item.id))}`
-  const script = generateScript(items, shareUrl)
+  // Anything other than the exact string `linux` is Windows. Every link shared
+  // before this parameter existed carries no `os` at all and must keep serving
+  // PowerShell, so Windows is the default rather than a detected value.
+  const linux = url.searchParams.get('os') === 'linux'
+
+  const shareUrl =
+    `${origin}/?p=${serializeIds(items.map((item) => item.id))}` +
+    (linux ? '&os=linux' : '')
+  const script = linux
+    ? generateBash(items, shareUrl)
+    : generateScript(items, shareUrl)
 
   const headers = new Headers({
     'Content-Type': 'text/plain; charset=utf-8',
@@ -36,7 +46,10 @@ export function GET(req: Request): Response {
   })
 
   if (url.searchParams.get('download') === '1') {
-    headers.set('Content-Disposition', `attachment; filename="${FILENAME}"`)
+    headers.set(
+      'Content-Disposition',
+      `attachment; filename="${FILENAME}.${linux ? 'sh' : 'ps1'}"`,
+    )
   }
 
   return new Response(script, { headers })

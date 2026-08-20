@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import type { Os } from "@/lib/types";
 
 /**
  * A token of the generated script, paired with the class that colours it.
@@ -51,11 +52,17 @@ const COMMENT_CLASS = "text-foreground/50";
  * Keywords are matched case-sensitively because the emitter writes them in
  * lower case; that is also what stops `ForEach-Object` being half-blue.
  * `param` is in the list although the emitter must never produce it -- if the
- * no-`param()` contract ever regresses, it lights up in the preview.
+ * no-`param()` contract ever regresses, it lights up in the preview. `set` is
+ * there for the same reason on the bash side: the generator must never emit
+ * `set -e`.
+ *
+ * One tokenizer serves both targets. The two shells disagree about keywords
+ * but not about quoting or `#` comments, which is where the reader is actually
+ * checking what a line does.
  */
 function tokenize(script: string): Token[] {
   const pattern =
-    /('[^']*(?:''[^']*)*'|"[^"]*")|(#[^\n]*)|\b(function|if|else|return|try|catch|not|param)\b/g;
+    /('[^']*(?:''[^']*)*'|"[^"]*")|(#[^\n]*)|\b(function|if|elif|else|fi|then|do|done|for|while|return|try|catch|not|param|export|set|local)\b/g;
 
   const tokens: Token[] = [];
   let cursor = 0;
@@ -80,7 +87,7 @@ function tokenize(script: string): Token[] {
   return tokens;
 }
 
-export function ScriptPreview({ script }: { script: string }) {
+export function ScriptPreview({ script, os }: { script: string; os: Os }) {
   const [open, setOpen] = useState(false);
 
   // Tokenising a script nobody has opened is wasted work, and the panel is
@@ -121,7 +128,7 @@ export function ScriptPreview({ script }: { script: string }) {
           id="script-body"
           tabIndex={0}
           role="region"
-          aria-label="Generated PowerShell script"
+          aria-label={`Generated ${os === "linux" ? "bash" : "PowerShell"} script`}
           className="border-border bg-background focus-visible:outline-ring mt-2 max-h-[60vh]
             overflow-auto rounded-lg border p-4 font-mono text-xs leading-relaxed
             focus-visible:outline-2 focus-visible:-outline-offset-2"

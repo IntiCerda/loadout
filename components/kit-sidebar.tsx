@@ -2,19 +2,27 @@
 
 import { useState } from "react";
 import { Check, Copy, Download, HardDrive } from "lucide-react";
-import type { Item } from "@/lib/types";
+import type { Item, Os } from "@/lib/types";
 import { formatSize } from "@/lib/resolve";
 
 /** Above this, the download is large enough to be worth warning about. */
 const LARGE_DOWNLOAD_MB = 20_480;
 
+const OS_LABELS: Record<Os, string> = { windows: "Windows", linux: "Linux" };
+const OS_ORDER: Os[] = ["windows", "linux"];
+
 type Props = {
+  /** Only what the chosen target can install. */
   items: Item[];
+  /** How many selected items the chosen target has to drop. */
+  droppedCount: number;
   sizeMb: number;
   /** Serialized selection, e.g. `git,vscode`. */
   query: string;
   /** Live origin, passed down so it matches what the route emits. */
   origin: string;
+  os: Os;
+  onOsChange: (os: Os) => void;
   children?: React.ReactNode;
 };
 
@@ -29,11 +37,30 @@ const CTA =
   "transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 " +
   "focus-visible:outline-ring";
 
-export function KitSidebar({ items, sizeMb, query, origin, children }: Props) {
+export function KitSidebar({
+  items,
+  droppedCount,
+  sizeMb,
+  query,
+  origin,
+  os,
+  onOsChange,
+  children,
+}: Props) {
   const [status, setStatus] = useState<CopyStatus>("idle");
   const empty = items.length === 0;
+  const linux = os === "linux";
 
-  const oneLiner = `irm "${origin}/api/script?p=${query}" | iex`;
+  const scriptUrl = `${origin}/api/script?p=${query}${linux ? "&os=linux" : ""}`;
+
+  // Not `curl ... | sudo bash`: that pipes the script into a shell whose stdin
+  // is the pipe, which is exactly the no-tty hang the generator guards
+  // against. The URL is single-quoted INSIDE the command substitution because
+  // its `&` would otherwise background the curl and leave `os=linux` running
+  // as a bare assignment — an empty script, and no error to explain it.
+  const oneLiner = linux
+    ? `sudo bash -c "$(curl -fsSL '${scriptUrl}')"`
+    : `irm "${scriptUrl}" | iex`;
 
   const copy = async () => {
     try {
@@ -69,6 +96,45 @@ export function KitSidebar({ items, sizeMb, query, origin, children }: Props) {
         >
           Your kit
         </h2>
+
+        {/* Toggle buttons in a labelled group, not `role="radiogroup"`. A
+            radio group owes the user arrow-key navigation and a roving
+            tabindex; two buttons owe nothing beyond Tab, and `aria-pressed`
+            already announces which one is live. */}
+        <div
+          role="group"
+          aria-label="Target operating system"
+          className="border-border mt-3 grid grid-cols-2 gap-1 rounded-lg border p-1"
+        >
+          {OS_ORDER.map((value) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={os === value}
+              onClick={() => onOsChange(value)}
+              className={`flex min-h-[44px] cursor-pointer items-center justify-center rounded-md
+                px-3 text-sm font-medium transition-colors duration-200
+                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
+                ${
+                  os === value
+                    ? "bg-secondary text-foreground"
+                    : "text-foreground/60 hover:bg-secondary/40"
+                }`}
+            >
+              {OS_LABELS[value]}
+            </button>
+          ))}
+        </div>
+
+        {linux && droppedCount > 0 ? (
+          // Said before the download, not discovered inside it. The script
+          // names each one; this is the number that makes the user look.
+          <p className="text-warning mt-2 text-xs">
+            {droppedCount} selected{" "}
+            {droppedCount === 1 ? "item is" : "items are"} not available on
+            Linux
+          </p>
+        ) : null}
 
         <div className="mt-3 flex items-baseline gap-3">
           <span className="text-3xl font-semibold tabular-nums">
@@ -106,17 +172,17 @@ export function KitSidebar({ items, sizeMb, query, origin, children }: Props) {
               className={`${CTA} bg-accent text-accent-foreground cursor-not-allowed opacity-40`}
             >
               <Download className="size-4" aria-hidden />
-              Download .ps1
+              Download {linux ? ".sh" : ".ps1"}
             </button>
           ) : (
             // A plain anchor, not `<Link>`: Next prefetches links in the
             // viewport, which would generate the script on every render.
             <a
-              href={`/api/script?p=${query}&download=1`}
+              href={`/api/script?p=${query}${linux ? "&os=linux" : ""}&download=1`}
               className={`${CTA} bg-accent text-accent-foreground cursor-pointer hover:opacity-90`}
             >
               <Download className="size-4" aria-hidden />
-              Download .ps1
+              Download {linux ? ".sh" : ".ps1"}
             </a>
           )}
 

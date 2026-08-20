@@ -1,12 +1,19 @@
 "use client";
 
-import { CATEGORY_LABELS, CATEGORY_ORDER, type Item } from "@/lib/types";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+  type Item,
+  type Os,
+} from "@/lib/types";
+import { linuxSupported } from "@/lib/generate-linux";
 import { ItemCard } from "./item-card";
 
 type Props = {
   items: Item[];
   selectedIds: Set<string>;
   requiredIds: Set<string>;
+  os: Os;
   onToggle: (id: string) => void;
 };
 
@@ -14,6 +21,7 @@ export function CatalogGrid({
   items,
   selectedIds,
   requiredIds,
+  os,
   onToggle,
 }: Props) {
   return (
@@ -41,6 +49,7 @@ export function CatalogGrid({
                   item={item}
                   checked={selectedIds.has(item.id)}
                   required={requiredIds.has(item.id)}
+                  unavailable={os === "linux" && !linuxSupported(item)}
                   index={index}
                   onToggle={onToggle}
                 />

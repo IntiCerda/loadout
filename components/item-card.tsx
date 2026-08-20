@@ -9,6 +9,8 @@ type Props = {
   checked: boolean;
   /** True when another selection pulled this item in via `requires`. */
   required: boolean;
+  /** True when the current target OS has no way to install this item. */
+  unavailable: boolean;
   /** Position within its category, used to stagger the entrance animation. */
   index: number;
   onToggle: (id: string) => void;
@@ -23,7 +25,14 @@ const STAGGER_MS = 25;
  */
 const MAX_STAGGERED = 16;
 
-export function ItemCard({ item, checked, required, index, onToggle }: Props) {
+export function ItemCard({
+  item,
+  checked,
+  required,
+  unavailable,
+  index,
+  onToggle,
+}: Props) {
   const active = checked || required;
 
   // Pulled in by another selection and never chosen directly, so it cannot be
@@ -32,6 +41,18 @@ export function ItemCard({ item, checked, required, index, onToggle }: Props) {
 
   const descriptionId = `${item.id}-desc`;
   const lockId = `${item.id}-lock`;
+  const unavailableId = `${item.id}-unavailable`;
+
+  // Still selectable, and still counted in the URL: the user may be building a
+  // kit for both targets, and switching back to Windows must not silently have
+  // dropped anything. It is marked, not removed.
+  const describedBy = [
+    descriptionId,
+    locked ? lockId : "",
+    unavailable ? unavailableId : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <label
@@ -49,7 +70,8 @@ export function ItemCard({ item, checked, required, index, onToggle }: Props) {
             ? "border-accent bg-accent/5"
             : "border-border bg-primary hover:border-secondary hover:bg-secondary/40"
         }
-        ${locked ? "cursor-not-allowed" : "cursor-pointer active:scale-[0.97]"}`}
+        ${locked ? "cursor-not-allowed" : "cursor-pointer active:scale-[0.97]"}
+        ${unavailable ? "opacity-60" : ""}`}
     >
       <input
         type="checkbox"
@@ -61,7 +83,7 @@ export function ItemCard({ item, checked, required, index, onToggle }: Props) {
         // of why. This keeps the card reachable and announced, and blocks the
         // toggle in the handler instead.
         aria-disabled={locked || undefined}
-        aria-describedby={locked ? `${descriptionId} ${lockId}` : descriptionId}
+        aria-describedby={describedBy}
         onChange={() => {
           if (!locked) onToggle(item.id);
         }}
@@ -94,6 +116,12 @@ export function ItemCard({ item, checked, required, index, onToggle }: Props) {
       {locked ? (
         <span id={lockId} className="text-accent text-xs">
           Required by your selection
+        </span>
+      ) : null}
+
+      {unavailable ? (
+        <span id={unavailableId} className="text-warning text-xs">
+          Not available on Linux
         </span>
       ) : null}
     </label>

@@ -5,9 +5,10 @@ import { BRAND } from './brand'
 /**
  * Installers the Windows emitter handles. Excludes the Linux-only variants so
  * that adding one to `Installer` for the Phase 5 bash target can never silently
- * widen this Record and demand a PowerShell emitter that must not exist.
- * `'script'` is pre-excluded; it joins `Installer` in Task 14. `apt` is the
- * Phase 5 Linux target and has no place in a Windows script.
+ * widen this Record and demand a PowerShell emitter that must not exist. `apt`
+ * and `script` are both Linux-only package sources -- `script` joined
+ * `Installer` in Task 14 and this exclusion already named it, which is why
+ * that widening cost nothing here.
  */
 type WindowsInstaller = Exclude<Installer, 'apt' | 'script'>
 
@@ -151,8 +152,13 @@ function psLiteral(value: string): string {
  * Same rule for a value emitted as a trailing `#` comment. A newline in
  * `item.name` would otherwise end the comment early and let the rest of the
  * name run as a new, executable PowerShell line.
+ *
+ * Exported because the ASCII-only rule is a contract both emitters share, and
+ * `lib/generate-linux.ts` builds its shell literals on top of it. The quoting
+ * functions stay per-shell -- those rules genuinely differ -- but there must be
+ * exactly one definition of what "printable ASCII" means.
  */
-function commentSafe(value: string): string {
+export function commentSafe(value: string): string {
   return value.replace(PRINTABLE_ASCII_ONLY, '')
 }
 
