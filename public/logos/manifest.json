@@ -1,0 +1,234 @@
+{
+  "go": {
+    "source": "https://go.dev/images/go-logo-blue.svg",
+    "license": "Go logo, (c) The Go Authors -- CC BY 4.0 / Go trademark, nominative use"
+  },
+  "node": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/nodedotjs.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "python": {
+    "source": "https://www.python.org/static/opengraph-icon-200x200.png",
+    "license": "Python logo, trademark of the Python Software Foundation, nominative use"
+  },
+  "java": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/eclipseadoptium.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- Eclipse Adoptium, the vendor that builds Temurin"
+  },
+  "rust": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/rust.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "dotnet": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/dotnet.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "deno": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/deno.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "bun": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/bun.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "vscode": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/visualstudiocode.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "neovim": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/neovim.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "cursor": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/cursor.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "zed": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/zedindustries.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "git": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/git.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "gh": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/github.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "windows-terminal": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/windowsterminal.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "powertoys": {
+    "source": "https://raw.githubusercontent.com/microsoft/PowerToys/main/doc/images/icons/PowerToys%20icon/PNG/2160x2160.png",
+    "license": "PowerToys app icon from the microsoft/PowerToys repo (MIT), Microsoft trademark, nominative use"
+  },
+  "jq": {
+    "source": "https://raw.githubusercontent.com/jqlang/jq/master/docs/public/icon.svg",
+    "license": "jq logo from the jqlang/jq repo (CC BY 3.0 project docs); monochrome mark, painted in the app foreground"
+  },
+  "make": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/gnu.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- GNU Project mark -- GNU Make ships no mark of its own"
+  },
+  "fd": {
+    "source": "https://raw.githubusercontent.com/sharkdp/fd/master/doc/logo.svg",
+    "license": "fd logo from the sharkdp/fd repo (MIT/Apache-2.0)"
+  },
+  "bat": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/bat.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "7zip": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/7zip.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "bruno": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/bruno.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ruff": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/ruff.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "docker": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/docker.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "kubectl": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/kubernetes.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "k9s": {
+    "source": "https://raw.githubusercontent.com/derailed/k9s/master/assets/k9s.png",
+    "license": "k9s logo from the derailed/k9s repo (Apache-2.0)"
+  },
+  "ollama": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/ollama.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "claude-code": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "codex-cli": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "gemini-cli": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "aider": {
+    "source": "https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/assets/logo.svg",
+    "license": "Aider logo from the Aider-AI/aider repo (Apache-2.0)"
+  },
+  "lm-studio": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/lmstudio.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "qwen2.5-coder-7b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/qwen.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "qwen2.5-coder-14b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/qwen.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "llama3.1-8b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/meta.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- Meta vendor mark -- Llama ships no separate icon"
+  },
+  "mistral-7b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/mistralai.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "granite3.3-8b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/ibm.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- IBM vendor mark -- Granite ships no separate icon"
+  },
+  "gemma2-9b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/google.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- Google vendor mark -- Gemma ships no separate icon"
+  },
+  "deepseek-coder-v2-16b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/deepseek.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "nomic-embed-text": {
+    "source": "https://github.com/nomic-ai.png",
+    "license": "Nomic AI mark from the official nomic-ai GitHub organisation avatar; monochrome mark, painted in the app foreground"
+  },
+  "ext-gitlens": {
+    "source": "https://eamodio.gallerycdn.vsassets.io/extensions/eamodio/gitlens/2026.8.200512/1787217264423/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the eamodio.gitlens VS Code extension, nominative use"
+  },
+  "ext-continue": {
+    "source": "https://Continue.gallerycdn.vsassets.io/extensions/continue/continue/2.1.0/1781829387808/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the Continue.continue VS Code extension, nominative use"
+  },
+  "ext-eslint": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/eslint.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-prettier": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/prettier.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-python": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/python.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-docker": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/docker.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-go": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/go.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-rust-analyzer": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/rust.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-mongodb": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/mongodb.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-rest-client": {
+    "source": "https://humao.gallerycdn.vsassets.io/extensions/humao/rest-client/0.25.1/1660918934840/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the humao.rest-client VS Code extension, nominative use"
+  },
+  "ext-editorconfig": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/editorconfig.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "ext-error-lens": {
+    "source": "https://usernamehw.gallerycdn.vsassets.io/extensions/usernamehw/errorlens/3.28.0/1769671423981/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the usernamehw.errorlens VS Code extension, nominative use"
+  },
+  "ext-tailwind": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/tailwindcss.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "font-jetbrains-mono": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/jetbrains.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- JetBrains vendor mark -- JetBrains Mono ships no separate icon"
+  },
+  "font-jetbrains-mono-nerd": {
+    "source": "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/images/nerd-fonts-logo.svg",
+    "license": "Nerd Fonts logo from the ryanoasis/nerd-fonts repo (MIT)"
+  },
+  "ubuntu": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/ubuntu.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "debian": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/debian.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "archlinux": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/archlinux.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  }
+}

@@ -465,6 +465,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'qwen2.5-coder:7b',
     requires: ['ollama'],
+    provider: 'Alibaba',
     sizeMb: 4466,
   },
   {
@@ -475,6 +476,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'qwen2.5-coder:14b',
     requires: ['ollama'],
+    provider: 'Alibaba',
     sizeMb: 8572,
   },
   {
@@ -485,6 +487,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'llama3.1:8b',
     requires: ['ollama'],
+    provider: 'Meta',
     sizeMb: 4693,
   },
   {
@@ -495,6 +498,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'mistral:7b',
     requires: ['ollama'],
+    provider: 'Mistral',
     sizeMb: 4170,
   },
   {
@@ -505,6 +509,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'granite3.3:8b',
     requires: ['ollama'],
+    provider: 'IBM',
     sizeMb: 4714,
   },
   {
@@ -515,6 +520,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'gemma2:9b',
     requires: ['ollama'],
+    provider: 'Google',
     sizeMb: 5191,
   },
   {
@@ -525,6 +531,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'deepseek-coder-v2:16b',
     requires: ['ollama'],
+    provider: 'DeepSeek',
     sizeMb: 8493,
   },
   {
@@ -535,6 +542,7 @@ export const catalog: Item[] = [
     installer: 'ollama',
     ref: 'nomic-embed-text',
     requires: ['ollama'],
+    provider: 'Nomic',
     sizeMb: 262,
   },
 

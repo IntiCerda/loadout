@@ -1,0 +1,30 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1320, "h": 900, "title": "A — Category rail" },
+    { "file": "Tabs.dc.html", "x": 1400, "y": 0, "w": 1320, "h": 820, "title": "B — Category tabs" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -150,
+      "w": 620,
+      "text": "Categories become a FILTER, not headings you scroll past.\nPresets (packs) stay separate, above.\nSub-filters by provider appear only for categories that have them.\nLogos are placeholder monograms — real marks get sourced from each vendor."
+    },
+    {
+      "id": "tradeoff-a",
+      "x": 0,
+      "y": 940,
+      "w": 400,
+      "text": "A — Rail\nAll 9 categories visible at once, no horizontal scroll, counts always readable.\nCosts 216px of grid width: 3 cards per row instead of 4."
+    },
+    {
+      "id": "tradeoff-b",
+      "x": 1400,
+      "y": 940,
+      "w": 400,
+      "text": "B — Tabs\nFull width for the grid: 4 cards per row.\nBut 9 tabs scroll horizontally on smaller screens, and the far ones get hidden."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

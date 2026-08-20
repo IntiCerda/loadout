@@ -76,6 +76,16 @@ export type Item = {
    * before a `wsl` item that declares it as a requirement.
    */
   requires?: string[]
+  /**
+   * Who makes the thing, when that is a useful way to narrow a category —
+   * the organisation behind a local model, not the package publisher.
+   *
+   * UI only, never emitted into a script. Set it for a whole category or not
+   * at all: `providersOf` hides the filter unless every item in the category
+   * carries one, because a chip row that silently drops untagged items is
+   * worse than no chip row.
+   */
+  provider?: string
   /** Approximate download size in megabytes. */
   sizeMb?: number
   /** Shown in the UI only. Never emitted into the script. */

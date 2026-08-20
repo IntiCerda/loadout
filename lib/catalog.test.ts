@@ -136,3 +136,21 @@ describe('linux coverage', () => {
     }
   })
 })
+
+describe('providers', () => {
+  it('names the provider of every local AI model', () => {
+    // `providersOf` hides the chip row unless the whole category is tagged,
+    // so one untagged model silently deletes the filter for all of them.
+    const missing = catalog
+      .filter((item) => item.category === 'ai-models' && !item.provider)
+      .map((item) => item.id)
+    expect(missing).toEqual([])
+  })
+
+  it('keeps provider names round-trippable through the query string', () => {
+    for (const item of catalog) {
+      if (!item.provider) continue
+      expect(encodeURIComponent(item.provider), item.id).toBe(item.provider)
+    }
+  })
+})

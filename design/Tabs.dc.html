@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; background: #0f172a; color: #f8fafc;
+           font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    a { color: #22c55e; } a:hover { color: #16a34a; }
+    .card { transition: transform .18s cubic-bezier(.34,1.56,.64,1), border-color .18s; }
+    .card:hover { transform: translateY(-2px); border-color: #64748b; }
+    .tab { transition: color .15s, border-color .15s; }
+    .chip { transition: background .15s, border-color .15s, color .15s; }
+  </style>
+</helmet>
+
+<div style="width: 1320px; padding: 28px 32px 40px; box-sizing: border-box;">
+
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px;">
+    <sc-for list="{{packs}}" as="p" hint-placeholder-count="5">
+      <div class="chip" style="display: flex; align-items: center; gap: 7px; height: 38px;
+                  padding: 0 15px; border-radius: 999px; font-size: 13.5px; font-weight: 500;
+                  border: 1px solid {{p.bd}}; background: {{p.bg}}; color: {{p.fg}};">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8"></path>
+        </svg>
+        {{p.name}}
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 26px; align-items: start;">
+    <div>
+
+      <!-- CATEGORY TABS, horizontal -->
+      <div style="display: flex; gap: 22px; border-bottom: 1px solid #1e293b; margin-bottom: 16px;
+                  overflow-x: auto;">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="9">
+          <div class="tab" style="display: flex; align-items: center; gap: 7px; height: 44px;
+                      white-space: nowrap; cursor: pointer; font-size: 14px; font-weight: 500;
+                      color: {{c.fg}}; border-bottom: 2px solid {{c.mark}}; margin-bottom: -1px;">
+            {{c.name}}
+            <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px;
+                         padding: 1px 6px; border-radius: 999px;
+                         background: {{c.pillBg}}; color: {{c.pillFg}};">{{c.count}}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;">
+        <span style="font-size: 13px; color: #94a3b8; margin-right: 2px;">Provider</span>
+        <sc-for list="{{subs}}" as="s" hint-placeholder-count="6">
+          <div class="chip" style="display: flex; align-items: center; gap: 7px; height: 32px;
+                      padding: 0 12px; border-radius: 8px; font-size: 13px; cursor: pointer;
+                      border: 1px solid {{s.bd}}; background: {{s.bg}}; color: {{s.fg}};">
+            <span style="width: 16px; height: 16px; border-radius: 4px; display: flex;
+                         align-items: center; justify-content: center; font-size: 9px;
+                         font-weight: 700; background: {{s.dot}}; color: #0f172a;">{{s.ini}}</span>
+            {{s.name}}
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+        <sc-for list="{{items}}" as="i" hint-placeholder-count="8">
+          <div class="card" style="display: flex; flex-direction: column; gap: 8px; padding: 14px;
+                      border-radius: 12px; border: 1px solid {{i.bd}}; background: {{i.bg}};">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+                          display: flex; align-items: center; justify-content: center;
+                          background: {{i.logoBg}}; color: {{i.logoFg}};
+                          font-size: 12px; font-weight: 700;">{{i.ini}}</div>
+              <div style="flex-grow: 1; min-width: 0;">
+                <div style="font-size: 14.5px; font-weight: 500; line-height: 1.25;">{{i.name}}</div>
+                <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px;
+                            color: #94a3b8; margin-top: 3px;">{{i.by}}</div>
+              </div>
+              <div style="width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+                          border: 1px solid {{i.boxBd}}; background: {{i.boxBg}};
+                          display: flex; align-items: center; justify-content: center;">
+                <sc-if value="{{i.on}}" hint-placeholder-val="{{ true }}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f172a"
+                       stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </sc-if>
+              </div>
+            </div>
+            <div style="font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">{{i.desc}}</div>
+            <div style="display: flex; align-items: center; gap: 8px;
+                        font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px;
+                        color: #94a3b8;">
+              <span>{{i.installer}}</span>
+              <span style="color: #475569;">·</span>
+              <span>{{i.size}}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="border: 1px solid #475569; border-radius: 12px; background: #1e293b; padding: 18px;">
+      <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px;
+                  letter-spacing: .14em; color: #94a3b8;">YOUR KIT</div>
+      <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 12px;">
+        <span style="font-size: 32px; font-weight: 600;">9</span>
+        <span style="font-size: 14px; color: #cbd5e1;">items</span>
+      </div>
+      <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px;
+                  color: #cbd5e1; margin-top: 4px;">14.2 GB to download</div>
+      <div style="height: 44px; border-radius: 10px; background: #22c55e; color: #0f172a;
+                  display: flex; align-items: center; justify-content: center;
+                  font-weight: 600; font-size: 15px; margin-top: 18px; cursor: pointer;">
+        Download .ps1
+      </div>
+      <div style="height: 44px; border-radius: 10px; border: 1px solid #475569;
+                  display: flex; align-items: center; justify-content: center;
+                  font-weight: 500; font-size: 15px; margin-top: 8px; cursor: pointer;">
+        Copy one-liner
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview":{"width":1320,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const on  = { bd: '#22c55e', bg: 'rgba(34,197,94,.06)', boxBd: '#22c55e', boxBg: '#22c55e', on: true };
+    const off = { bd: '#475569', bg: '#1e293b', boxBd: '#475569', boxBg: 'transparent', on: false };
+    const item = (ini, name, by, desc, installer, size, logoBg, logoFg, sel) =>
+      ({ ini, name, by, desc, installer, size, logoBg, logoFg, ...(sel ? on : off) });
+
+    return {
+      packs: ['Go Backend', 'React Frontend', 'DevOps', 'AI Local', 'AI Agents'].map((name, n) => ({
+        name,
+        bd: n === 3 ? '#22c55e' : '#475569',
+        bg: n === 3 ? 'rgba(34,197,94,.10)' : 'transparent',
+        fg: n === 3 ? '#22c55e' : '#f8fafc',
+      })),
+      cats: [
+        ['Languages', 8], ['Editors', 4], ['Tools', 13], ['Containers', 3],
+        ['AI apps', 6], ['Local AI models', 8], ['Extensions', 13], ['Fonts', 4], ['Linux', 3],
+      ].map(([name, count], n) => ({
+        name, count,
+        fg: n === 5 ? '#f8fafc' : '#94a3b8',
+        mark: n === 5 ? '#22c55e' : 'transparent',
+        pillBg: n === 5 ? 'rgba(34,197,94,.14)' : '#1e293b',
+        pillFg: n === 5 ? '#22c55e' : '#64748b',
+      })),
+      subs: [
+        ['All', 'A', '#64748b'], ['Alibaba', 'Q', '#f97316'], ['Meta', 'M', '#60a5fa'],
+        ['Mistral', 'M', '#fbbf24'], ['IBM', 'G', '#a78bfa'],
+        ['Nomic', 'N', '#34d399'], ['DeepSeek', 'D', '#818cf8'],
+      ].map(([name, ini, dot], n) => ({
+        name, ini, dot,
+        bd: n === 0 ? '#22c55e' : '#475569',
+        bg: n === 0 ? 'rgba(34,197,94,.10)' : 'transparent',
+        fg: n === 0 ? '#22c55e' : '#cbd5e1',
+      })),
+      items: [
+        item('Q', 'Qwen2.5 Coder 7B', 'Alibaba', 'Strong at fill-in-the-middle.', 'ollama', '4.4 GB', '#7c2d12', '#fdba74', true),
+        item('Q', 'Qwen2.5 Coder 14B', 'Alibaba', 'Better at whole-file edits.', 'ollama', '8.4 GB', '#7c2d12', '#fdba74', false),
+        item('M', 'Llama 3.1 8B', 'Meta', 'General-purpose instruct model.', 'ollama', '4.6 GB', '#1e3a8a', '#93c5fd', false),
+        item('M', 'Mistral 7B', 'Mistral', 'Fast, small footprint.', 'ollama', '4.1 GB', '#78350f', '#fcd34d', true),
+        item('G', 'Granite 3.3 8B', 'IBM', 'Enterprise-tuned instruct model.', 'ollama', '4.6 GB', '#4c1d95', '#c4b5fd', false),
+        item('G', 'Gemma 2 9B', 'Google', 'Open weights, solid reasoning.', 'ollama', '5.1 GB', '#134e4a', '#5eead4', false),
+        item('D', 'DeepSeek Coder V2', 'DeepSeek', 'Mixture-of-experts code model.', 'ollama', '8.3 GB', '#312e81', '#a5b4fc', false),
+        item('N', 'Nomic Embed Text', 'Nomic', 'Embedding model for local RAG.', 'ollama', '256 MB', '#064e3b', '#6ee7b7', true),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -102,8 +102,13 @@
   }
 }
 
+/* `backwards`, not `both`. Backwards is the half that does the work: it holds
+   the card at opacity 0 through its stagger delay. Forwards adds nothing --
+   the `to` state is the resting state -- and costs something, because a
+   finished animation keeps overriding `transform` for the life of the page,
+   which quietly beats any transition that later wants the same property. */
 .card-in {
-  animation: card-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: card-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
 
 /* Classic monospace typewriter: clip the line to a whole number of character
