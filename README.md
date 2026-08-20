@@ -43,13 +43,23 @@ get marked **Not available on Linux** on the card, are counted in a sidebar
 warning before you download, and are named by the script itself at runtime for
 anyone who never opened the page. They are never silently dropped.
 
-## Screenshot
+## What it looks like
 
-> **TODO — screenshot missing.** This placeholder is deliberate: no real
-> capture of the running app was available when this file was written, and a
-> mocked-up image would be a lie about what ships. Replace this block with
-> `![Loadout](docs/screenshot.png)` after taking a 1440px-wide capture of
-> `http://localhost:3000` with a pack applied.
+![Loadout — the catalog, a pack applied, and the running download total](docs/screenshot.png)
+
+Pick a pack or tick items one at a time. The sidebar keeps a running count and
+download total — Ollama models are 4 to 9 GB each, and nothing else warns you
+before the download starts.
+
+![The generated PowerShell, rendered live as you select](docs/screenshot-script.png)
+
+Selecting a VS Code extension pulls VS Code in as **Required by your
+selection** — locked, still keyboard-reachable, and announced as unavailable
+rather than silently skipped. The panel on the right is the generated
+PowerShell, re-rendered on every tick. It is byte-for-byte what `/api/script`
+serves, which is asserted by a test rather than assumed.
+
+Captured from a production build at 1440x900.
 
 ## The generated script is readable by design
 
