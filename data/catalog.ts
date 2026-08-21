@@ -493,6 +493,7 @@ export const catalog: Item[] = [
   },
   {
     id: 'lazygit',
+    logoOnLight: true,
     name: 'lazygit',
     description: 'Terminal UI for git: stage, commit, rebase and push.',
     category: 'tools',
@@ -732,6 +733,7 @@ export const catalog: Item[] = [
   },
   {
     id: 'lazydocker',
+    logoOnLight: true,
     name: 'lazydocker',
     description: 'Terminal UI for docker containers, images and logs.',
     category: 'containers',
@@ -845,6 +847,7 @@ export const catalog: Item[] = [
   },
   {
     id: 'gpt4all',
+    logoOnLight: true,
     name: 'GPT4All',
     description: 'Nomic desktop app for local models with document chat.',
     category: 'ai-apps',
@@ -857,6 +860,7 @@ export const catalog: Item[] = [
   },
   {
     id: 'msty',
+    logoOnLight: true,
     name: 'Msty',
     description: 'Desktop app for local and remote models in one interface.',
     category: 'ai-apps',
