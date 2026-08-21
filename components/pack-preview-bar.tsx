@@ -35,7 +35,7 @@ export function PackPreviewBar({
   onExit,
 }: Props) {
   return (
-    <div className="border-accent/40 bg-primary mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border p-3 sm:p-4">
+    <div className="surface border-accent/40 bg-primary mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border p-3 sm:p-4">
       {/* No live region on this sentence. The bar mounts and unmounts with
           the preview, and a live region inserted at the same moment as its
           text is announced unreliably; `app/page.tsx` keeps a permanent

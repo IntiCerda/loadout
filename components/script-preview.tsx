@@ -101,7 +101,7 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
     // and the sidebar gave it 280. Every real line was clipped, so the one
     // feature this product is built around -- read it before you run it -- was
     // rendered in a column too narrow to read it in.
-    <div className="border-border bg-primary rounded-xl border p-4 sm:p-5">
+    <div className="surface border-border bg-primary rounded-xl border p-4 sm:p-5">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -134,8 +134,8 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
         // an empty div for a blank line collapses to zero height.
         //
         // The height cap is tighter at `lg`, where this panel sits inside the
-        // sticky band: 70vh of script under the presets row would pin most of
-        // the viewport and leave the catalog it floats over unreadable. The
+        // fixed-height app shell: the band it belongs to shares 100dvh with
+        // the grid, and 70vh of script would push the catalog off-screen. The
         // panel already scrolls itself, so the cap costs nothing but a shorter
         // window onto the same text.
         <pre

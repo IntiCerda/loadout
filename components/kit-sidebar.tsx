@@ -8,6 +8,13 @@ import { formatSize } from "@/lib/resolve";
 /** Above this, the download is large enough to be worth warning about. */
 const LARGE_DOWNLOAD_MB = 20_480;
 
+/**
+ * Full-bar ceiling for the size meter: 5 GiB, roughly a kitchen-sink kit with
+ * a couple of local models. Purely presentational — the label next to it
+ * carries the real number, this is just the at-a-glance weight of the kit.
+ */
+const METER_CEILING_MB = 5_120;
+
 const OS_LABELS: Record<Os, string> = { windows: "Windows", linux: "Linux" };
 const OS_ORDER: Os[] = ["windows", "linux"];
 
@@ -82,11 +89,25 @@ export function KitSidebar({
     // heading it already renders is the name.
     <aside
       aria-labelledby="kit-heading"
-      // Sticks to the live height of the band above the grid — see the note
-      // on `--band-h` in `app/page.tsx`.
-      className="lg:sticky lg:top-[var(--band-h)] lg:self-start"
+      // A full-height column of the fixed shell at `lg`, scrolling itself
+      // when the viewport is shorter than the panel — which is what keeps the
+      // download and copy controls reachable with the script panel open.
+      //
+      // `relative` is load-bearing: the `sr-only` live region at the bottom of
+      // the card is `position: absolute`, and without a positioned ancestor
+      // its containing block is the initial containing block — so whenever
+      // this column scrolls, that box's static position extended the
+      // DOCUMENT's scroll area past the fixed shell, unclippable by any
+      // ancestor overflow because none of them was its containing block.
+      className="app-scroll relative lg:min-h-0 lg:overflow-y-auto"
     >
-      <div className="border-border bg-primary rounded-xl border p-5">
+      <div className="surface border-border bg-primary relative overflow-hidden rounded-xl border p-5">
+        {/* Accent hairline along the top edge, matching the item cards, so the
+            three kinds of raised surface share one visual language. */}
+        <span
+          aria-hidden
+          className="from-accent absolute inset-x-0 top-0 h-px bg-linear-to-r via-sky-400 to-transparent opacity-50"
+        />
         {/* Not `/40`: this heading names the landmark and the whole panel, so
             it is essential copy. `/40` measures 3.50:1 on this card and fails
             AA; `/60` is 6.00:1. */}
@@ -137,13 +158,26 @@ export function KitSidebar({
         ) : null}
 
         <div className="mt-3 flex items-baseline gap-3">
-          <span className="text-3xl font-semibold tabular-nums">
+          <span
+            className={`text-3xl font-semibold tabular-nums ${
+              empty
+                ? ""
+                : "from-accent bg-linear-to-r to-sky-400 bg-clip-text text-transparent"
+            }`}
+          >
             {items.length}
           </span>
           <span className="text-foreground/60 text-sm">
             {items.length === 1 ? "item" : "items"}
           </span>
         </div>
+
+        {empty ? (
+          <p className="text-foreground/50 mt-2 text-xs">
+            Tick anything in the catalog — dependencies come along on their
+            own.
+          </p>
+        ) : null}
 
         <p
           className={`mt-1 flex items-center gap-1.5 font-mono text-sm ${
@@ -156,6 +190,21 @@ export function KitSidebar({
           <HardDrive className="size-4" aria-hidden />
           {formatSize(sizeMb)} to download
         </p>
+
+        {/* The label above is the accessible value; this bar only restates it
+            visually, so it is hidden from assistive tech rather than being a
+            second, vaguer announcement of the same number. */}
+        <div
+          aria-hidden
+          className="bg-secondary/40 mt-2 h-1.5 overflow-hidden rounded-full"
+        >
+          <div
+            className="from-accent bg-linear-to-r h-full rounded-full to-sky-400 transition-[width] duration-200"
+            style={{
+              width: `${Math.min(100, (sizeMb / METER_CEILING_MB) * 100)}%`,
+            }}
+          />
+        </div>
 
         <div className="mt-5 flex flex-col gap-2">
           {empty ? (
@@ -179,7 +228,8 @@ export function KitSidebar({
             // viewport, which would generate the script on every render.
             <a
               href={`/api/script?p=${query}${linux ? "&os=linux" : ""}&download=1`}
-              className={`${CTA} bg-accent text-accent-foreground cursor-pointer hover:opacity-90`}
+              className={`${CTA} text-accent-foreground from-accent cursor-pointer bg-linear-to-b to-emerald-600
+                shadow-[0_10px_24px_-10px_var(--accent)] hover:brightness-110`}
             >
               <Download className="size-4" aria-hidden />
               Download {linux ? ".sh" : ".ps1"}

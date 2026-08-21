@@ -40,7 +40,10 @@ export function ProviderChips({ providers, selected, onSelect }: Props) {
               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
               ${
                 active
-                  ? "border-accent bg-accent/10 text-accent"
+                  ? // `--cat` is the current category's hue, set by the column
+                    // wrapper in `app/page.tsx`. The label stays foreground:
+                    // some hues would fail AA as text on the tinted chip.
+                    "border-[var(--cat)] bg-[color-mix(in_srgb,var(--cat)_14%,transparent)] text-foreground"
                   : "border-border text-foreground/80 hover:border-muted-foreground/60 hover:bg-primary"
               }`}
           >

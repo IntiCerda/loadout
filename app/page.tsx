@@ -1,6 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useSyncExternalStore } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { catalog } from "@/data/catalog";
 import { packs } from "@/data/packs";
 import { generateScript } from "@/lib/generate";
@@ -23,6 +28,7 @@ import {
   readProvider,
 } from "@/lib/filter";
 import { SITE_URL } from "@/lib/brand";
+import { categoryHue } from "@/lib/hues";
 import type { Os } from "@/lib/types";
 import { Hero } from "@/components/hero";
 import { CatalogGrid } from "@/components/catalog-grid";
@@ -47,28 +53,6 @@ function subscribeToUrl(onChange: () => void) {
     window.removeEventListener("popstate", onChange);
     window.removeEventListener(SELECTION_EVENT, onChange);
   };
-}
-
-/**
- * Publishes the sticky band's own height as `--band-h`, which is what the rail
- * and the kit panel stick to. A constant would be a lie: the band grows when
- * the script panel opens and again when a pack preview bar appears, and a rail
- * pinned to a stale number would spend that time hidden behind it.
- *
- * A ref callback with a cleanup, not an effect — `react-hooks/set-state-in-
- * effect` is an error in this config, and there is no state here anyway: the
- * measurement goes straight into a custom property that CSS reads.
- */
-function measureBand(node: HTMLDivElement | null) {
-  if (!node) return;
-  const observer = new ResizeObserver(() => {
-    document.documentElement.style.setProperty(
-      "--band-h",
-      `${node.offsetHeight}px`,
-    );
-  });
-  observer.observe(node);
-  return () => observer.disconnect();
 }
 
 /** Anything but the exact string `linux` is Windows, matching the route. */
@@ -341,29 +325,55 @@ export default function Page() {
           matching strips down both sides. */}
       <Hero origin={origin} />
 
-      <main className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
-        {/* Everything that is not the grid stays put. `position: sticky` and
-            not a nested scroll container: a fixed-height shell with its own
-            `overflow-y-auto` middle column would buy the same effect and cost
-            height arithmetic, a second scrollbar, page-level keyboard
-            scrolling and the mobile viewport. The hero above scrolls away
-            normally, because it is a hero.
+      {/* The app shell. At `lg` this section is exactly `100dvh` and the grid
+          column scrolls internally, so the document's total height is the hero
+          plus one viewport — constant for every filter, category and pack
+          state — and the document scroll is just the hero handing over to the
+          app. `snap-start` here and on the hero are the two snap points that
+          scroll settles onto. `.app-zone` layers glows and a dot grid so the
+          section is not a flat slab.
 
-            Off below `lg`. Three stacked sticky bands on a 375px screen would
-            leave nothing to scroll into.
-
-            `bg-background` is load-bearing: without it the grid shows through
-            the band as it passes underneath. */}
-        <div
-          ref={measureBand}
-          className="bg-background z-30 pt-4 pb-6 lg:sticky lg:top-0"
-        >
+          Below `lg` none of the `lg:` classes apply and the page is today's
+          one normal document — three nested scrollers on a 375px screen would
+          leave nothing to scroll. */}
+      <div className="app-zone lg:h-dvh lg:snap-start">
+        <main className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:flex lg:h-full lg:flex-col lg:px-8 lg:pb-0">
+          {/* The band: presets, script disclosure, pack preview. Static at the
+              top of the shell — the shell itself never scrolls at `lg`, so the
+              sticky machinery (and the measured `--band-h` it needed) is gone.
+              The script panel caps itself at `38vh` on `lg` and scrolls
+              internally, so opening it shrinks the grid row without pushing it
+              off-screen. */}
+          {/* `relative` for the same reason as on the kit column: the
+              `sr-only` live region below is absolutely positioned and needs a
+              containing block inside the shell. */}
+          <div className="relative shrink-0 pt-4 pb-6">
           <div className="mb-5">
             <div className="mb-2.5 flex items-center gap-3">
               <h2 className="text-muted-foreground font-mono text-xs tracking-widest uppercase">
                 Presets
               </h2>
               <span aria-hidden className="bg-primary h-px grow" />
+              <a
+                href="https://github.com/IntiCerda/loadout"
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground/60 hover:text-foreground flex min-h-[44px] items-center gap-1.5
+                  font-mono text-xs transition-colors duration-200
+                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              >
+                {/* Inline mark: lucide dropped its brand icons, and one 15-line
+                    path is not worth a dependency. */}
+                <svg
+                  aria-hidden
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  className="size-4"
+                >
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+                </svg>
+                GitHub
+              </a>
             </div>
             <PackChips
               packs={packs}
@@ -396,14 +406,29 @@ export default function Page() {
           ) : null}
         </div>
 
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[216px_minmax(0,1fr)_300px]">
+        {/* `minmax(0,1fr)` on the single row is what caps the columns at the
+            shell's remaining height instead of letting the tallest column set
+            it; each column then scrolls itself.
+
+            No `overscroll-behavior` anywhere, deliberately: `contain` blocks
+            chaining even at scrollTop 0 (measured, not guessed), which would
+            strand the user in the app with no scroll path back to the hero.
+            Wheel latching already stops a mid-gesture overshoot from chaining;
+            a fresh gesture at the top boundary chains to the document, which
+            is exactly the way back up. */}
+        <div className="grid grid-cols-1 items-start gap-6 lg:min-h-0 lg:grow lg:grid-cols-[216px_minmax(0,1fr)_300px] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch lg:pb-4">
           <CategoryRail
             entries={entries}
             selected={category}
             onSelect={setCategory}
           />
 
-          <div className="min-w-0">
+          {/* `--cat` is the current category's hue; the provider chips inside
+              read it for their active state. Cards set their own per item. */}
+          <div
+            className="app-scroll relative min-w-0 lg:min-h-0 lg:overflow-y-auto lg:pr-1"
+            style={{ "--cat": categoryHue(category) } as CSSProperties}
+          >
             <ProviderChips
               providers={providers}
               selected={provider}
@@ -431,8 +456,9 @@ export default function Page() {
             os={os}
             onOsChange={setOs}
           />
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </>
   );
 }

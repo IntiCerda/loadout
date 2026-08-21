@@ -1,7 +1,9 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { Check, Lock } from "lucide-react";
 import type { Item } from "@/lib/types";
+import { categoryHue } from "@/lib/hues";
 import { formatSize } from "@/lib/resolve";
 
 type Props = {
@@ -59,20 +61,35 @@ export function ItemCard({
       // The stagger rides on the card itself rather than a wrapper div: the
       // cards are direct grid children and grid stretches them to equal
       // heights per row, which an extra block-level wrapper would break.
-      style={{
-        animationDelay: `${Math.min(index, MAX_STAGGERED) * STAGGER_MS}ms`,
-      }}
-      className={`card-in group relative flex min-h-[44px] flex-col gap-2 rounded-xl border p-3.5
+      style={
+        {
+          animationDelay: `${Math.min(index, MAX_STAGGERED) * STAGGER_MS}ms`,
+          // The card's category hue: the top hairline, the hover ring and
+          // shadow, and the selected glow all read it.
+          "--cat": categoryHue(item.category),
+        } as CSSProperties
+      }
+      className={`card-in surface group relative flex min-h-[44px] flex-col gap-2 overflow-hidden rounded-xl border p-3.5
         transition-all duration-[180ms] hover:-translate-y-0.5
+        hover:shadow-[0_10px_24px_-10px_color-mix(in_srgb,var(--cat)_45%,transparent)]
+        hover:ring-1 hover:ring-[color-mix(in_srgb,var(--cat)_45%,transparent)]
         focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring
         ${
           active
-            ? "border-accent bg-accent/5"
+            ? "border-accent bg-accent/5 shadow-[0_0_24px_-8px_color-mix(in_srgb,var(--cat)_55%,transparent)]"
             : "border-border bg-primary hover:border-muted-foreground/60"
         }
         ${locked ? "cursor-not-allowed" : "cursor-pointer active:scale-[0.97]"}
         ${unavailable ? "opacity-60" : ""}`}
     >
+      {/* Category hairline, fading out toward the corners so it reads as a
+          glow along the top edge rather than a stroke. Decorative; the hue
+          also appears on the rail's active entry, so colour is never the only
+          carrier of meaning. */}
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-[var(--cat)] to-transparent opacity-60"
+      />
       <input
         type="checkbox"
         className="sr-only"
@@ -92,7 +109,7 @@ export function ItemCard({
       <span className="flex items-start gap-2.5">
         <span
           aria-hidden
-          className="bg-muted text-foreground relative flex size-[34px] shrink-0 items-center justify-center rounded-[9px] font-mono text-sm font-bold"
+          className="bg-muted text-foreground relative flex size-[34px] shrink-0 items-center justify-center rounded-[9px] font-mono text-sm font-bold ring-1 ring-[color-mix(in_srgb,var(--cat)_28%,transparent)] transition-transform duration-[180ms] group-hover:scale-105"
         >
           {item.name[0]}
           {/* Monogram underneath, logo over it. Not every item has a file, so
@@ -154,9 +171,13 @@ export function ItemCard({
         {item.description}
       </span>
 
-      <span className="text-foreground/50 flex items-center gap-2 font-mono text-xs">
-        <span>{item.installer}</span>
-        {item.sizeMb ? <span>{formatSize(item.sizeMb)}</span> : null}
+      <span className="mt-auto flex items-center gap-2 font-mono text-xs">
+        <span className="border-border/60 bg-background/50 text-foreground/60 rounded-md border px-1.5 py-0.5">
+          {item.installer}
+        </span>
+        {item.sizeMb ? (
+          <span className="text-foreground/50">{formatSize(item.sizeMb)}</span>
+        ) : null}
       </span>
 
       {locked ? (

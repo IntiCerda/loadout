@@ -26,7 +26,10 @@ export function PackChips({
     // minimum size of zero, so it scrolls itself instead of widening the page;
     // `p-1` keeps the focus rings from being clipped by that same overflow.
     <div
-      className="flex gap-2 overflow-x-auto p-1"
+      // The mask fades the right edge out as a "there is more" cue for the
+      // horizontal scroll; 40px of trailing padding keeps the last chip clear
+      // of the fade once the row is scrolled to its end.
+      className="flex gap-2 overflow-x-auto p-1 pr-10 [mask-image:linear-gradient(90deg,black_calc(100%-40px),transparent)]"
       role="group"
       aria-label="Starter packs"
     >
@@ -49,18 +52,30 @@ export function PackChips({
             aria-label={`Preview the ${pack.name} pack`}
             onClick={() => onPreview(pack.slug)}
             className={`flex min-h-[44px] shrink-0 cursor-pointer items-center gap-2 rounded-full border
-              px-4 text-sm font-medium transition-all duration-200 active:scale-[0.97]
+              px-4 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]
               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
               ${
                 active
-                  ? "border-accent bg-accent text-accent-foreground"
+                  ? "border-accent bg-accent text-accent-foreground shadow-[0_8px_20px_-8px_var(--accent)]"
                   : applied
                     ? "border-accent bg-accent/10 text-accent"
-                    : "border-border hover:border-secondary hover:bg-secondary/40"
+                    : "surface border-border bg-primary hover:border-muted-foreground/60"
               }`}
           >
-            <Package className="size-4" aria-hidden />
+            <Package
+              className={`size-4 ${active ? "" : "text-accent"}`}
+              aria-hidden
+            />
             {pack.name}
+            <span
+              className={`rounded-full px-1.5 py-0.5 font-mono text-[11px] tabular-nums ${
+                active
+                  ? "bg-accent-foreground/15"
+                  : "bg-secondary/50 text-foreground/60"
+              }`}
+            >
+              {pack.items.length}
+            </span>
           </button>
         );
       })}

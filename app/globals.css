@@ -43,8 +43,14 @@
 
 :root {
   /* Palette from the plan's Global Constraints, mapped onto the semantic
-     names shadcn's components actually consume. */
-  --background: #0f172a;
+     names shadcn's components actually consume.
+
+     The background sits one step BELOW the plan's #0f172a: raised surfaces
+     (#1e293b) barely separated from the original ground, and depth on a dark
+     UI comes from the ground being darker than the things standing on it.
+     Every documented contrast ratio in this repo was measured against equal
+     or lighter surfaces, so darkening the ground can only raise them. */
+  --background: #0b1120;
   --foreground: #f8fafc;
   --primary: #1e293b;
   --primary-foreground: #ffffff; /* the plan's --color-on-primary */
@@ -71,13 +77,6 @@
   --ring: #22c55e; /* accent green, so the focus ring is visible on slate */
 
   --radius: 0.625rem;
-
-  /* Height of the sticky band (presets + script bar + any pack preview) that
-     the category rail and the kit panel park underneath. A ResizeObserver in
-     `app/page.tsx` overwrites this with the real measurement; the 0 here is
-     what the first paint and any non-JS render use, which is also the correct
-     value below `lg`, where nothing is sticky at all. */
-  --band-h: 0px;
 }
 
 @layer base {
@@ -137,6 +136,102 @@
   animation-fill-mode: both;
 }
 
+/* ---- App shell (lg and up) -------------------------------------------- */
+
+/* The document scroller. At `lg` the app section below the hero is exactly
+   100dvh and scrolls internally, so the document's whole scroll range is the
+   hero's height; these two snap points let a release near the boundary settle
+   cleanly onto either the hero or the app. `proximity`, never `mandatory`:
+   mandatory would trap trackpad users mid-flick. Below `lg` the page is one
+   normal document and snapping it would fight ordinary browsing. */
+@media (min-width: 64rem) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+}
+
+/* The hero fades and drifts down as it scrolls out, driven by the document
+   scroll position itself — no JS, no scroll listeners. Gated twice: on
+   support, so Safari/Firefox degrade to a plain scroll, and on `lg`, where
+   the document scroll range is exactly the hero's height so the default
+   0–100% range maps the fade precisely onto the hero leaving the screen. */
+@keyframes hero-out {
+  to {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  @media (min-width: 64rem) {
+    .hero-scroll {
+      animation: hero-out linear both;
+      animation-timeline: scroll();
+    }
+  }
+}
+
+/* Depth for the app zone, which is otherwise a flat #0f172a slab: two large
+   radial glows echoing the hero's ambient light, over a ~3%-opacity dot grid.
+   Background layers only — nothing enters the accessibility tree. */
+.app-zone {
+  background-image:
+    radial-gradient(
+      50% 40% at 18% 0%,
+      color-mix(in srgb, var(--accent) 9%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      50% 45% at 85% 100%,
+      color-mix(in srgb, #0ea5e9 9%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      color-mix(in srgb, var(--muted-foreground) 13%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    auto,
+    auto,
+    24px 24px;
+}
+
+/* Internal scrollers of the fixed-height shell. Without this the grid column
+   grows a full-width grey OS scrollbar down the middle of the page. */
+.app-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) transparent;
+}
+
+.app-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-scroll::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 4px;
+}
+
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Raised-surface treatment for card-like containers. Depth on a dark theme
+   comes from light, not from outlines: a faint top-down sheen, a 1px inner
+   top highlight (the edge a light source above would catch) and a soft drop
+   shadow into the darker ground. Pure paint — layout and semantics untouched,
+   so it composes with any existing `bg-*` utility on the same element. */
+.surface {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--foreground) 4%, transparent),
+    transparent 45%
+  );
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 7%, transparent),
+    0 12px 32px -16px rgb(0 0 0 / 0.55);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -149,5 +244,12 @@
     animation-delay: -1ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* The blanket rule above cannot reach a scroll-driven animation: duration
+     and delay are ignored when progress comes from the scroll position, so
+     the hero would still fade on scroll. Only removing it neutralises it. */
+  .hero-scroll {
+    animation: none !important;
   }
 }

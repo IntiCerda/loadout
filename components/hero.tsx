@@ -1,5 +1,7 @@
-import { Terminal } from "lucide-react";
+import { ChevronDown, Sparkles, Terminal } from "lucide-react";
 import { BRAND, TAGLINE } from "@/lib/brand";
+import { catalog } from "@/data/catalog";
+import { packs } from "@/data/packs";
 
 /** Milliseconds per character. The whole line takes `length * this`. */
 const MS_PER_CHAR = 35;
@@ -20,7 +22,10 @@ export function Hero({ origin }: Props) {
   const line = `irm ${origin.replace(/^https?:\/\//, "")}/api/script?p=go,git,vscode | iex`;
 
   return (
-    <header className="relative overflow-hidden py-16 sm:py-24">
+    // `hero-scroll` fades and drifts the hero as it scrolls out (CSS
+    // scroll-driven, `lg` + supporting browsers only); `lg:snap-start` is one
+    // of the two proximity snap points the document settles onto.
+    <header className="hero-scroll relative overflow-hidden py-16 sm:py-24 lg:snap-start">
       {/* Ambient light. Decorative only, hidden from assistive tech. */}
       <div
         aria-hidden
@@ -32,7 +37,14 @@ export function Hero({ origin }: Props) {
       />
 
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-        <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">
+        <p className="border-accent/25 bg-accent/10 text-accent mx-auto mb-6 flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs">
+          <Sparkles className="size-3.5" aria-hidden />
+          {catalog.length} tools · {packs.length} packs · Windows + Debian
+        </p>
+
+        {/* Gradient ink, static. `bg-clip-text` needs the transparent text
+            colour to show the gradient through the glyphs. */}
+        <h1 className="from-accent via-emerald-300 bg-linear-to-r to-sky-400 bg-clip-text text-5xl font-semibold tracking-tight text-transparent sm:text-6xl">
           {BRAND}
         </h1>
         <p className="text-foreground/70 mt-4 text-xl">{TAGLINE}</p>
@@ -41,7 +53,15 @@ export function Hero({ origin }: Props) {
           One readable script for Windows or Debian, no installer to trust.
         </p>
 
-        <div className="border-border bg-primary mt-8 flex items-center gap-3 rounded-xl border px-4 py-3 text-left font-mono text-sm">
+        <div className="surface border-border bg-primary shadow-accent/5 mt-8 flex items-center gap-3 rounded-xl border px-4 py-3 text-left font-mono text-sm">
+          {/* Terminal chrome: the three window dots every developer reads as
+              "this is a terminal", then the prompt icon. Decoration only. */}
+          <span aria-hidden className="flex shrink-0 items-center gap-1.5">
+            <span className="size-2.5 rounded-full bg-[#f87171]/70" />
+            <span className="size-2.5 rounded-full bg-[#fbbf24]/70" />
+            <span className="size-2.5 rounded-full bg-[#22c55e]/70" />
+          </span>
+          <span aria-hidden className="bg-border h-4 w-px shrink-0" />
           <Terminal className="text-accent size-4 shrink-0" aria-hidden />
           <code className="text-foreground/80 flex items-center overflow-x-auto whitespace-nowrap">
             {/*
@@ -78,6 +98,13 @@ export function Hero({ origin }: Props) {
               className="bg-accent ml-0.5 inline-block h-4 w-2 shrink-0 animate-pulse"
             />
           </code>
+        </div>
+
+        {/* Scroll cue, `lg` only: that is where the app below is a fixed shell
+            the document snaps onto, so "there is more down there" is worth a
+            hint. Decorative — the content is one ordinary scroll away. */}
+        <div aria-hidden className="mt-10 hidden justify-center lg:flex">
+          <ChevronDown className="text-foreground/40 size-5 animate-bounce" />
         </div>
       </div>
     </header>
