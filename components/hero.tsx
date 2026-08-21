@@ -31,7 +31,7 @@ export function Hero({ origin }: Props) {
         className="pointer-events-none absolute -top-20 right-1/4 size-80 rounded-full bg-sky-500/10 blur-[120px]"
       />
 
-      <div className="relative mx-auto max-w-3xl text-center">
+      <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
         <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">
           {BRAND}
         </h1>

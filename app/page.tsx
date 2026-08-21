@@ -237,8 +237,14 @@ export default function Page() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <>
+      {/* Full-bleed on purpose. Inside main's padded, max-width container the
+          hero's own overflow-hidden clipped the ambient glow at the container
+          edge, leaving a hard 48px band of flat background above the title and
+          matching strips down both sides. */}
       <Hero origin={origin} />
+
+      <main className="mx-auto w-full max-w-7xl px-4 pt-4 pb-12 sm:px-6 lg:px-8">
 
       <div className="mb-7">
         <div className="mb-2.5 flex items-center gap-3">
@@ -290,6 +296,7 @@ export default function Page() {
           onOsChange={setOs}
         />
       </div>
-    </main>
+      </main>
+    </>
   );
 }
