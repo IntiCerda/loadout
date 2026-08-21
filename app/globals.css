@@ -141,17 +141,11 @@
 
 /* ---- App shell (lg and up) -------------------------------------------- */
 
-/* The document scroller. At `lg` the app section below the hero is exactly
-   100dvh and scrolls internally, so the document's whole scroll range is the
-   hero's height; these two snap points let a release near the boundary settle
-   cleanly onto either the hero or the app. `proximity`, never `mandatory`:
-   mandatory would trap trackpad users mid-flick. Below `lg` the page is one
-   normal document and snapping it would fight ordinary browsing. */
-@media (min-width: 64rem) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-}
+/* No scroll snapping on the document, deliberately. It was tried: at `lg` the
+   whole scroll range is just the hero's height (~430px), so a single wheel
+   tick lands mid-range and `proximity` yanks the page back to whichever snap
+   point is nearer — which reads as "the page undoes my scroll". Snapping only
+   works when snap points are farther apart than one scroll gesture. */
 
 /* The hero fades and drifts down as it scrolls out, driven by the document
    scroll position itself — no JS, no scroll listeners. Gated twice: on

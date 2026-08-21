@@ -329,14 +329,14 @@ export default function Page() {
           column scrolls internally, so the document's total height is the hero
           plus one viewport — constant for every filter, category and pack
           state — and the document scroll is just the hero handing over to the
-          app. `snap-start` here and on the hero are the two snap points that
-          scroll settles onto. `.app-zone` layers glows and a dot grid so the
-          section is not a flat slab.
+          app. No scroll snapping: with a scroll range this short, `proximity`
+          undoes single wheel ticks (see globals.css). `.app-zone` layers glows
+          and a dot grid so the section is not a flat slab.
 
           Below `lg` none of the `lg:` classes apply and the page is today's
           one normal document — three nested scrollers on a 375px screen would
           leave nothing to scroll. */}
-      <div className="app-zone lg:h-dvh lg:snap-start">
+      <div className="app-zone lg:h-dvh">
         <main className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:flex lg:h-full lg:flex-col lg:px-8 lg:pb-0">
           {/* The band: presets, script disclosure, pack preview. Static at the
               top of the shell — the shell itself never scrolls at `lg`, so the

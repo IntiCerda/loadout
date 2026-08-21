@@ -23,9 +23,8 @@ export function Hero({ origin }: Props) {
 
   return (
     // `hero-scroll` fades and drifts the hero as it scrolls out (CSS
-    // scroll-driven, `lg` + supporting browsers only); `lg:snap-start` is one
-    // of the two proximity snap points the document settles onto.
-    <header className="hero-scroll relative overflow-hidden py-16 sm:py-24 lg:snap-start">
+    // scroll-driven, `lg` + supporting browsers only).
+    <header className="hero-scroll relative overflow-hidden py-16 sm:py-24">
       {/* Ambient light. Decorative only, hidden from assistive tech. */}
       <div
         aria-hidden
