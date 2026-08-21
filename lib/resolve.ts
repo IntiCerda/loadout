@@ -44,3 +44,15 @@ export function formatSize(mb: number): string {
   if (rounded < 1024) return `${rounded} MB`
   return `${(rounded / 1024).toFixed(1)} GB`
 }
+
+/**
+ * The ids in a resolved set that nobody asked for directly — everything
+ * `requires` dragged in. The catalog grid marks these so a card that appeared
+ * on its own explains itself, and so a dependency cannot be un-ticked out from
+ * under the item that needs it.
+ */
+export function dependencyIds(resolved: Item[], direct: Set<string>): Set<string> {
+  return new Set(
+    resolved.map((item) => item.id).filter((id) => !direct.has(id)),
+  )
+}

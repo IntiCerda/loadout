@@ -71,6 +71,13 @@
   --ring: #22c55e; /* accent green, so the focus ring is visible on slate */
 
   --radius: 0.625rem;
+
+  /* Height of the sticky band (presets + script bar + any pack preview) that
+     the category rail and the kit panel park underneath. A ResizeObserver in
+     `app/page.tsx` overwrites this with the real measurement; the 0 here is
+     what the first paint and any non-JS render use, which is also the correct
+     value below `lg`, where nothing is sticky at all. */
+  --band-h: 0px;
 }
 
 @layer base {

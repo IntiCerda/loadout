@@ -1,4 +1,9 @@
-import { CATEGORY_LABELS, CATEGORY_ORDER, type Item } from './types'
+import {
+  CATEGORY_LABELS,
+  CATEGORY_ORDER,
+  type Item,
+  type Pack,
+} from './types'
 
 /**
  * Sentinel for "no filter". It is not a category id and no provider is named
@@ -73,4 +78,22 @@ export function filterItems(
       (category === ALL || item.category === category) &&
       (provider === ALL || item.provider === provider),
   )
+}
+
+/**
+ * Pack slug from the query string, validated against the packs that exist.
+ * Anything else is `null` — a stale or hand-edited `?pack=` renders the plain
+ * catalog rather than a preview of nothing.
+ */
+export function readPack(raw: string | null, packs: Pack[]): string | null {
+  return raw && packs.some((pack) => pack.slug === raw) ? raw : null
+}
+
+/**
+ * Whether a pack's ids are all directly selected already. This is the exact
+ * condition `applyPack` treats as "remove", so the chip, the preview bar and
+ * the mutation cannot disagree about which way the next click goes.
+ */
+export function packApplied(ids: string[], selected: Set<string>): boolean {
+  return ids.every((id) => selected.has(id))
 }

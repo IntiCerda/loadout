@@ -132,6 +132,12 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
         // user, and what proves the preview matches /api/script. A div per
         // line breaks both: `textContent` concatenates with no separator, and
         // an empty div for a blank line collapses to zero height.
+        //
+        // The height cap is tighter at `lg`, where this panel sits inside the
+        // sticky band: 70vh of script under the presets row would pin most of
+        // the viewport and leave the catalog it floats over unreadable. The
+        // panel already scrolls itself, so the cap costs nothing but a shorter
+        // window onto the same text.
         <pre
           id="script-body"
           tabIndex={0}
@@ -139,7 +145,7 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
           aria-label={`Generated ${os === "linux" ? "bash" : "PowerShell"} script`}
           className="border-border bg-background focus-visible:outline-ring mt-3 max-h-[70vh]
             overflow-auto rounded-lg border p-4 font-mono text-xs leading-relaxed
-            focus-visible:outline-2 focus-visible:-outline-offset-2"
+            focus-visible:outline-2 focus-visible:-outline-offset-2 lg:max-h-[38vh]"
         >
           <code>
             {tokens.map((token, index) =>

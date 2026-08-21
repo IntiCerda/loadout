@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { resolve, totalSizeMb, formatSize } from './resolve'
+import {
+  resolve,
+  totalSizeMb,
+  formatSize,
+  dependencyIds,
+} from './resolve'
 import type { Item } from './types'
 
 const base = { description: '', category: 'tools', installer: 'winget' } as const
@@ -68,5 +73,26 @@ describe('formatSize', () => {
 
   it('rounds before comparing against the GB boundary', () => {
     expect(formatSize(1023.6)).toBe('1.0 GB')
+  })
+})
+
+describe('dependencyIds', () => {
+  it('is empty when nothing was pulled in', () => {
+    const direct = new Set(['a'])
+    expect([...dependencyIds(resolve(['a'], items), direct)]).toEqual([])
+  })
+
+  it('names only what requires dragged in', () => {
+    const direct = new Set(['c'])
+    expect([...dependencyIds(resolve(['c'], items), direct)]).toEqual(['a', 'b'])
+  })
+
+  it('leaves an id alone once it is also chosen directly', () => {
+    const direct = new Set(['b', 'a'])
+    expect([...dependencyIds(resolve(['b', 'a'], items), direct)]).toEqual([])
+  })
+
+  it('is empty for an empty resolution', () => {
+    expect([...dependencyIds([], new Set())]).toEqual([])
   })
 })

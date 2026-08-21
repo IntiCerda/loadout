@@ -82,7 +82,9 @@ export function KitSidebar({
     // heading it already renders is the name.
     <aside
       aria-labelledby="kit-heading"
-      className="lg:sticky lg:top-8 lg:self-start"
+      // Sticks to the live height of the band above the grid — see the note
+      // on `--band-h` in `app/page.tsx`.
+      className="lg:sticky lg:top-[var(--band-h)] lg:self-start"
     >
       <div className="border-border bg-primary rounded-xl border p-5">
         {/* Not `/40`: this heading names the landmark and the whole panel, so

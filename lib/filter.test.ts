@@ -3,11 +3,13 @@ import {
   ALL,
   categoryEntries,
   filterItems,
+  packApplied,
   providersOf,
   readCategory,
+  readPack,
   readProvider,
 } from './filter'
-import type { Item } from './types'
+import type { Item, Pack } from './types'
 
 const base = { description: '', installer: 'ollama', ref: 'r' } as const
 
@@ -117,5 +119,50 @@ describe('filterItems', () => {
       'b',
       'c',
     ])
+  })
+})
+
+const testPacks: Pack[] = [
+  { slug: 'go-backend', name: 'Go Backend', description: '', items: ['a', 'b'] },
+  { slug: 'fonts-only', name: 'Fonts', description: '', items: ['f'] },
+]
+
+describe('readPack', () => {
+  it('returns null for null', () => {
+    expect(readPack(null, testPacks)).toBeNull()
+  })
+
+  it('returns null for an empty string', () => {
+    expect(readPack('', testPacks)).toBeNull()
+  })
+
+  it('returns a slug that names a real pack', () => {
+    expect(readPack('go-backend', testPacks)).toBe('go-backend')
+  })
+
+  it('drops a slug no pack answers to, so a stale link renders the catalog', () => {
+    expect(readPack('go-frontend', testPacks)).toBeNull()
+  })
+
+  it('is case sensitive, since slugs are lower case by construction', () => {
+    expect(readPack('Go-Backend', testPacks)).toBeNull()
+  })
+})
+
+describe('packApplied', () => {
+  it('is false when nothing is selected', () => {
+    expect(packApplied(['a', 'b'], new Set())).toBe(false)
+  })
+
+  it('is false when only some ids are selected', () => {
+    expect(packApplied(['a', 'b'], new Set(['a']))).toBe(false)
+  })
+
+  it('is true when every id is selected', () => {
+    expect(packApplied(['a', 'b'], new Set(['a', 'b']))).toBe(true)
+  })
+
+  it('ignores selections the pack does not contain', () => {
+    expect(packApplied(['a'], new Set(['a', 'z']))).toBe(true)
   })
 })

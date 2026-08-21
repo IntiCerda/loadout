@@ -161,7 +161,10 @@ export function ItemCard({
 
       {locked ? (
         <span id={lockId} className="text-accent text-xs">
-          Required by your selection
+          {/* Not "required by your selection": the same card renders inside a
+              pack preview, where nothing is selected yet and the requirement
+              comes from the pack. This wording is true in both. */}
+          Required by another item
         </span>
       ) : null}
 

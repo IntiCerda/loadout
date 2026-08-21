@@ -15,7 +15,14 @@ type Props = {
  */
 export function CategoryRail({ entries, selected, onSelect }: Props) {
   return (
-    <nav aria-label="Categories" className="min-w-0 lg:sticky lg:top-6">
+    <nav
+      aria-label="Categories"
+      // `--band-h` is the live height of the sticky band above the grid,
+      // published by a ResizeObserver in `app/page.tsx`. Sticking to a constant
+      // would hide this rail behind the band whenever the script panel or a
+      // pack preview makes it taller.
+      className="min-w-0 lg:sticky lg:top-[var(--band-h)]"
+    >
       <h2 className="text-muted-foreground mb-2 px-3 font-mono text-xs tracking-widest uppercase">
         Categories
       </h2>
