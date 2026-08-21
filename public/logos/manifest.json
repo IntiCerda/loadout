@@ -226,5 +226,97 @@
   "archlinux": {
     "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/archlinux.svg",
     "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively"
+  },
+  "llama3.2-3b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/meta.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- Meta vendor mark -- Llama ships no separate icon -- copied from llama3.1-8b"
+  },
+  "qwen2.5-14b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/qwen.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- copied from qwen2.5-coder-14b"
+  },
+  "mistral-nemo-12b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/mistralai.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- copied from mistral-7b"
+  },
+  "gemma3-4b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/google.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- Google vendor mark -- Gemma ships no separate icon -- copied from gemma2-9b"
+  },
+  "deepseek-r1-8b": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/deepseek.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- copied from deepseek-coder-v2-16b"
+  },
+  "claude-desktop": {
+    "source": "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/claude.svg",
+    "license": "CC0 1.0 (Simple Icons icon file); brand mark is a trademark of its owner, used nominatively -- copied from claude-code"
+  },
+  "ext-cpptools": {
+    "source": "https://ms-vscode.gallerycdn.vsassets.io/extensions/ms-vscode/cpptools/1.33.8/1786993226733/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the ms-vscode.cpptools VS Code extension, nominative use"
+  },
+  "ext-jupyter": {
+    "source": "https://ms-toolsai.gallerycdn.vsassets.io/extensions/ms-toolsai/jupyter/2026.6.2026071501/1784109533470/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the ms-toolsai.jupyter VS Code extension, nominative use"
+  },
+  "ext-live-server": {
+    "source": "https://ritwickdey.gallerycdn.vsassets.io/extensions/ritwickdey/liveserver/5.7.10/1772184436918/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the ritwickdey.LiveServer VS Code extension, nominative use"
+  },
+  "ext-remote-wsl": {
+    "source": "https://ms-vscode-remote.gallerycdn.vsassets.io/extensions/ms-vscode-remote/remote-wsl/0.104.3/1759355620566/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the ms-vscode-remote.remote-wsl VS Code extension, nominative use"
+  },
+  "ext-remote-ssh": {
+    "source": "https://ms-vscode-remote.gallerycdn.vsassets.io/extensions/ms-vscode-remote/remote-ssh/0.125.2026082015/1787238954960/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the ms-vscode-remote.remote-ssh VS Code extension, nominative use"
+  },
+  "ext-material-icons": {
+    "source": "https://PKief.gallerycdn.vsassets.io/extensions/pkief/material-icon-theme/5.37.0/1784456141964/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the PKief.material-icon-theme VS Code extension, nominative use"
+  },
+  "ext-one-dark-pro": {
+    "source": "https://zhuangtongfa.gallerycdn.vsassets.io/extensions/zhuangtongfa/material-theme/3.20.2/1786670803832/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the zhuangtongfa.material-theme VS Code extension, nominative use"
+  },
+  "ext-catppuccin": {
+    "source": "https://Catppuccin.gallerycdn.vsassets.io/extensions/catppuccin/catppuccin-vsc/3.19.0/1777714479763/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the Catppuccin.catppuccin-vsc VS Code extension, nominative use"
+  },
+  "ext-tokyo-night": {
+    "source": "https://enkia.gallerycdn.vsassets.io/extensions/enkia/tokyo-night/1.1.2/1738784080756/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the enkia.tokyo-night VS Code extension, nominative use"
+  },
+  "ext-svelte": {
+    "source": "https://svelte.gallerycdn.vsassets.io/extensions/svelte/svelte-vscode/110.3.1/1786599982616/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the svelte.svelte-vscode VS Code extension, nominative use"
+  },
+  "ext-vue": {
+    "source": "https://Vue.gallerycdn.vsassets.io/extensions/vue/volar/3.3.11/1787306786187/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the Vue.volar VS Code extension, nominative use"
+  },
+  "ext-prisma": {
+    "source": "https://Prisma.gallerycdn.vsassets.io/extensions/prisma/prisma/31.11.0/1779207746054/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the Prisma.prisma VS Code extension, nominative use"
+  },
+  "ext-astro": {
+    "source": "https://astro-build.gallerycdn.vsassets.io/extensions/astro-build/astro-vscode/2.16.18/1785257605245/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the astro-build.astro-vscode VS Code extension, nominative use"
+  },
+  "ext-biome": {
+    "source": "https://biomejs.gallerycdn.vsassets.io/extensions/biomejs/biome/2026.8.190716/1787123817073/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the biomejs.biome VS Code extension, nominative use"
+  },
+  "ext-dotenv": {
+    "source": "https://mikestead.gallerycdn.vsassets.io/extensions/mikestead/dotenv/1.0.1/1519894859412/Microsoft.VisualStudio.Services.Icons.Default",
+    "license": "Official published icon of the mikestead.dotenv VS Code extension, nominative use"
+  },
+  "starship": {
+    "source": "https://raw.githubusercontent.com/starship/starship/master/media/icon.png",
+    "license": "ISC (Starship project media); brand mark used nominatively"
+  },
+  "wezterm": {
+    "source": "https://raw.githubusercontent.com/wez/wezterm/main/assets/icon/terminal.png",
+    "license": "MIT (WezTerm project asset); brand mark used nominatively"
   }
 }

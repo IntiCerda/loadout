@@ -147,6 +147,74 @@ export const catalog: Item[] = [
     linux: { installer: 'script', ref: 'https://bun.sh/install' },
     sizeMb: 55,
   },
+  {
+    id: 'zig',
+    name: 'Zig',
+    description: 'The Zig compiler, build system and C cross-compiler.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'zig.zig',
+    // No linux target: not in noble, and upstream ships only tarball release
+    // assets -- no install script.
+    sizeMb: 45,
+  },
+  {
+    id: 'ruby',
+    name: 'Ruby 3.3',
+    description: 'Ruby via RubyInstaller.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'RubyInstallerTeam.Ruby.3.3',
+    // `ruby-full` pulls the interpreter, irb and the docs in one package.
+    linux: { installer: 'apt', ref: 'ruby-full' },
+    sizeMb: 60,
+  },
+  {
+    id: 'php',
+    name: 'PHP 8.4',
+    description: 'The PHP interpreter and CLI.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'PHP.PHP.8.4',
+    // `php-cli`, not `php`: the noble metapackage drags in Apache, a web
+    // server nobody asked for by ticking "PHP". Noble ships 8.3, one minor
+    // behind the Windows install.
+    linux: { installer: 'apt', ref: 'php-cli' },
+    sizeMb: 32,
+  },
+  {
+    id: 'julia',
+    name: 'Julia',
+    description: 'Dynamic language for numerical and scientific computing.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'Julialang.Julia',
+    // No linux target: julia left the Ubuntu archive before noble, and the
+    // official installer (juliaup) prompts for confirmation, which
+    // `script_install` cannot answer.
+    sizeMb: 190,
+  },
+  {
+    id: 'llvm',
+    name: 'LLVM/Clang',
+    description: 'The LLVM toolchain with the Clang C and C++ compiler.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'LLVM.LLVM',
+    linux: { installer: 'apt', ref: 'clang' },
+    sizeMb: 330,
+  },
+  {
+    id: 'lua',
+    name: 'Lua',
+    description: 'Lightweight embeddable scripting language.',
+    category: 'languages',
+    installer: 'winget',
+    ref: 'DEVCOM.Lua',
+    // `lua5.4`: noble publishes no unversioned `lua` package.
+    linux: { installer: 'apt', ref: 'lua5.4' },
+    sizeMb: 5,
+  },
 
   // --- editors ---
   {
@@ -197,6 +265,82 @@ export const catalog: Item[] = [
     // Not in noble, but Zed's documented Linux install is a shell script.
     linux: { installer: 'script', ref: 'https://zed.dev/install.sh' },
     sizeMb: 180,
+  },
+  {
+    id: 'sublime-text',
+    name: 'Sublime Text',
+    description: 'Fast proprietary text editor with a deep plugin ecosystem.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'SublimeHQ.SublimeText.4',
+    // No linux target, though a Linux build exists. Sublime publishes only an
+    // apt repo to add by hand -- no noble package and no install script.
+    sizeMb: 20,
+  },
+  {
+    id: 'notepad-plus-plus',
+    name: 'Notepad++',
+    description: 'The classic lightweight Windows text editor.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'Notepad++.Notepad++',
+    // No linux target: a Windows-only product.
+    sizeMb: 5,
+  },
+  {
+    id: 'jetbrains-toolbox',
+    name: 'JetBrains Toolbox',
+    description: 'Installs and updates every JetBrains IDE from one place.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'JetBrains.Toolbox',
+    // No linux target, though a Linux build exists. It ships only as a
+    // tarball, which `script_install` cannot consume.
+    sizeMb: 100,
+  },
+  {
+    id: 'intellij-idea-ce',
+    name: 'IntelliJ IDEA Community',
+    description: 'The free JetBrains IDE for Java and Kotlin.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'JetBrains.IntelliJIDEA.Community',
+    // No linux target, though a Linux build exists. JetBrains ships a tarball
+    // and a snap -- no noble package and no install script.
+    sizeMb: 800,
+  },
+  {
+    id: 'pycharm-ce',
+    name: 'PyCharm Community',
+    description: 'The free JetBrains IDE for Python.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'JetBrains.PyCharm.Community',
+    // No linux target, though a Linux build exists. Same shape as IntelliJ:
+    // tarball and snap only.
+    sizeMb: 600,
+  },
+  {
+    id: 'helix',
+    name: 'Helix',
+    description: 'Modal terminal editor with built-in LSP, no config required.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'Helix.Helix',
+    // No linux target: not in noble, and upstream ships only a PPA and
+    // tarball release assets -- no install script.
+    sizeMb: 30,
+  },
+  {
+    id: 'android-studio',
+    name: 'Android Studio',
+    description: 'Google IDE for Android development, SDK manager included.',
+    category: 'editors',
+    installer: 'winget',
+    ref: 'Google.AndroidStudio',
+    // No linux target, though a Linux build exists. Google ships only a
+    // tarball -- no noble package and no install script.
+    sizeMb: 1200,
   },
 
   // --- tools ---
@@ -347,6 +491,176 @@ export const catalog: Item[] = [
     requires: ['python'],
     sizeMb: 25,
   },
+  {
+    id: 'lazygit',
+    name: 'lazygit',
+    description: 'Terminal UI for git: stage, commit, rebase and push.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'JesseDuffield.lazygit',
+    // No linux target: not in noble, and upstream ships only tarball release
+    // assets -- no install script.
+    requires: ['git'],
+    sizeMb: 8,
+  },
+  {
+    id: 'fzf',
+    name: 'fzf',
+    description: 'Fuzzy finder that filters anything you pipe into it.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'junegunn.fzf',
+    linux: { installer: 'apt', ref: 'fzf' },
+    sizeMb: 2,
+  },
+  {
+    id: 'delta',
+    name: 'delta',
+    description: 'Syntax-highlighting pager for git and diff output.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'dandavison.delta',
+    // `git-delta` -- noble publishes no package called `delta`.
+    linux: { installer: 'apt', ref: 'git-delta' },
+    requires: ['git'],
+    sizeMb: 6,
+  },
+  {
+    id: 'zoxide',
+    name: 'zoxide',
+    description: 'A smarter cd that ranks the directories you actually use.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'ajeetdsouza.zoxide',
+    linux: { installer: 'apt', ref: 'zoxide' },
+    sizeMb: 2,
+  },
+  {
+    id: 'starship',
+    name: 'Starship',
+    description: 'Fast cross-shell prompt configured in one TOML file.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Starship.Starship',
+    // No linux target: not in noble, and the vendor script prompts for
+    // confirmation on /dev/tty, which `script_install` cannot answer -- the
+    // same shape that ruled out rustup's script.
+    sizeMb: 10,
+  },
+  {
+    id: 'oh-my-posh',
+    name: 'Oh My Posh',
+    description: 'Prompt theme engine for PowerShell and every other shell.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'JanDeDobbeleer.OhMyPosh',
+    // No linux target: not in noble, and the vendor script is non-interactive
+    // but unpacks into $HOME/.local/bin -- run as root that is /root, which
+    // the desktop user never sees. Same shape that ruled out dotnet-install.
+    sizeMb: 15,
+  },
+  {
+    id: 'wezterm',
+    name: 'WezTerm',
+    description: 'GPU-accelerated terminal with multiplexing built in.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'wez.wezterm',
+    // No linux target, though a Linux build exists. WezTerm ships .deb and
+    // AppImage release assets and publishes no install script.
+    sizeMb: 60,
+  },
+  {
+    id: 'alacritty',
+    name: 'Alacritty',
+    description: 'Minimal GPU-accelerated terminal emulator.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Alacritty.Alacritty',
+    linux: { installer: 'apt', ref: 'alacritty' },
+    sizeMb: 15,
+  },
+  {
+    id: 'postman',
+    name: 'Postman',
+    description: 'API platform for building, testing and documenting requests.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Postman.Postman',
+    // No linux target, though a Linux build exists. Postman ships only a
+    // tarball and a snap -- no noble package and no install script.
+    sizeMb: 150,
+  },
+  {
+    id: 'httpie',
+    name: 'HTTPie',
+    description: 'Human-friendly HTTP client for the terminal.',
+    category: 'tools',
+    installer: 'pipx',
+    ref: 'httpie',
+    requires: ['python'],
+    sizeMb: 10,
+  },
+  {
+    id: 'dbeaver',
+    name: 'DBeaver Community',
+    description: 'Universal database GUI: Postgres, MySQL, SQLite and more.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'DBeaver.DBeaver.Community',
+    // No linux target, though a Linux build exists. DBeaver ships .deb, .rpm
+    // and snap -- no noble package and no install script.
+    sizeMb: 120,
+  },
+  {
+    id: 'ngrok',
+    name: 'ngrok',
+    description: 'Public tunnels to services running on localhost.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Ngrok.Ngrok',
+    // No linux target: not in noble, and ngrok publishes only its own apt
+    // repo to add by hand plus tarballs -- no install script.
+    sizeMb: 10,
+  },
+  {
+    id: 'terraform',
+    name: 'Terraform',
+    description: 'Infrastructure as code across every major cloud.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Hashicorp.Terraform',
+    // No linux target: the BSL licence keeps Terraform out of noble, and
+    // HashiCorp publishes only its own apt repo to add by hand -- no install
+    // script.
+    sizeMb: 30,
+  },
+  {
+    id: 'aws-cli',
+    name: 'AWS CLI',
+    description: 'The AWS command-line interface, v2.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Amazon.AWSCLI',
+    // No linux target: noble carries no awscli package in any pocket, and
+    // upstream ships a zip installer, not a script -- `script_install` runs
+    // what it downloads with `bash`.
+    sizeMb: 40,
+  },
+  {
+    id: 'azure-cli',
+    name: 'Azure CLI',
+    description: 'The Microsoft Azure command-line interface.',
+    category: 'tools',
+    installer: 'winget',
+    ref: 'Microsoft.AzureCLI',
+    // No apt package in noble. This is Microsoft's documented one-line
+    // installer: it adds the Microsoft apt repo and installs azure-cli
+    // system-wide, and it requires root -- which the generated script
+    // guarantees before any installer runs.
+    linux: { installer: 'script', ref: 'https://aka.ms/InstallAzureCLIDeb' },
+    sizeMb: 70,
+  },
 
   // --- containers ---
   {
@@ -389,6 +703,57 @@ export const catalog: Item[] = [
     // tarball release assets -- no install script.
     requires: ['kubectl'],
     sizeMb: 30,
+  },
+  {
+    id: 'helm',
+    name: 'Helm',
+    description: 'The Kubernetes package manager.',
+    category: 'containers',
+    installer: 'winget',
+    ref: 'Helm.Helm',
+    // Not in noble, but the official installer is a non-interactive shell
+    // script that resolves the latest release and installs to /usr/local/bin.
+    linux: {
+      installer: 'script',
+      ref: 'https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3',
+    },
+    sizeMb: 20,
+  },
+  {
+    id: 'podman-desktop',
+    name: 'Podman Desktop',
+    description: 'Daemonless container management with a Docker-compatible UI.',
+    category: 'containers',
+    installer: 'winget',
+    ref: 'RedHat.Podman-Desktop',
+    // No linux target, though a Linux build exists. It ships as a flatpak,
+    // which `script_install` cannot consume.
+    sizeMb: 150,
+  },
+  {
+    id: 'lazydocker',
+    name: 'lazydocker',
+    description: 'Terminal UI for docker containers, images and logs.',
+    category: 'containers',
+    installer: 'winget',
+    ref: 'JesseDuffield.Lazydocker',
+    // No linux target: not in noble, and the upstream install script unpacks
+    // into $HOME/.local/bin -- run as root that is /root. Same shape that
+    // ruled out dotnet-install.
+    requires: ['docker'],
+    sizeMb: 6,
+  },
+  {
+    id: 'dive',
+    name: 'dive',
+    description: 'Explore each layer of a docker image and find wasted space.',
+    category: 'containers',
+    installer: 'winget',
+    ref: 'wagoodman.dive',
+    // No linux target: not in noble, and upstream ships only .deb, .rpm and
+    // tarball release assets -- no install script.
+    requires: ['docker'],
+    sizeMb: 8,
   },
 
   // --- ai apps ---
@@ -456,6 +821,50 @@ export const catalog: Item[] = [
     // product from the desktop app this item names, and under a root-run
     // script it would land in /root.
     sizeMb: 550,
+  },
+  {
+    id: 'claude-desktop',
+    name: 'Claude Desktop',
+    description: 'The Anthropic Claude app for Windows.',
+    category: 'ai-apps',
+    installer: 'winget',
+    ref: 'Anthropic.Claude',
+    // No linux target: Anthropic ships no Linux build.
+    sizeMb: 100,
+  },
+  {
+    id: 'jan',
+    name: 'Jan',
+    description: 'Open-source desktop app for running local models offline.',
+    category: 'ai-apps',
+    installer: 'winget',
+    ref: 'Jan.Jan',
+    // No linux target, though a Linux build exists. Jan ships .deb and
+    // AppImage release assets and publishes no install script.
+    sizeMb: 200,
+  },
+  {
+    id: 'gpt4all',
+    name: 'GPT4All',
+    description: 'Nomic desktop app for local models with document chat.',
+    category: 'ai-apps',
+    installer: 'winget',
+    ref: 'nomic.gpt4all',
+    // No linux target, though a Linux build exists. The Linux download is an
+    // interactive graphical .run installer, which `script_install` cannot
+    // drive.
+    sizeMb: 250,
+  },
+  {
+    id: 'msty',
+    name: 'Msty',
+    description: 'Desktop app for local and remote models in one interface.',
+    category: 'ai-apps',
+    installer: 'winget',
+    ref: 'CloudStack.Msty',
+    // No linux target, though a Linux build exists. Msty ships only an
+    // AppImage, which `script_install` cannot run.
+    sizeMb: 180,
   },
 
   // --- ai models ---
@@ -546,6 +955,72 @@ export const catalog: Item[] = [
     requires: ['ollama'],
     provider: 'Nomic',
     sizeMb: 262,
+  },
+  {
+    id: 'llama3.2-3b',
+    name: 'Llama 3.2 3B',
+    description: 'Small Meta model that fits comfortably in 4GB of VRAM.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'llama3.2:3b',
+    requires: ['ollama'],
+    provider: 'Meta',
+    sizeMb: 1926,
+  },
+  {
+    id: 'phi4-14b',
+    name: 'Phi-4 14B',
+    description: 'Microsoft reasoning-focused model, strong for its size.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'phi4:14b',
+    requires: ['ollama'],
+    provider: 'Microsoft',
+    sizeMb: 8634,
+  },
+  {
+    id: 'deepseek-r1-8b',
+    name: 'DeepSeek R1 8B',
+    description: 'Distilled reasoning model that shows its chain of thought.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'deepseek-r1:8b',
+    requires: ['ollama'],
+    provider: 'DeepSeek',
+    sizeMb: 4983,
+  },
+  {
+    id: 'gemma3-4b',
+    name: 'Gemma 3 4B',
+    description: 'Google multimodal model that reads images on modest VRAM.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'gemma3:4b',
+    requires: ['ollama'],
+    provider: 'Google',
+    sizeMb: 3184,
+  },
+  {
+    id: 'qwen2.5-14b',
+    name: 'Qwen2.5 14B',
+    description: 'General-purpose Qwen, the non-coder sibling of the coders.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'qwen2.5:14b',
+    requires: ['ollama'],
+    provider: 'Alibaba',
+    sizeMb: 8572,
+  },
+  {
+    id: 'mistral-nemo-12b',
+    name: 'Mistral NeMo 12B',
+    description: 'Mistral and NVIDIA joint model with a 128k context window.',
+    category: 'ai-models',
+    installer: 'ollama',
+    ref: 'mistral-nemo:12b',
+    requires: ['ollama'],
+    provider: 'Mistral',
+    sizeMb: 6744,
   },
 
   // --- extensions ---
@@ -680,6 +1155,156 @@ export const catalog: Item[] = [
     requires: ['vscode'],
     sizeMb: 10,
   },
+  {
+    id: 'ext-cpptools',
+    name: 'C/C++',
+    description: 'Microsoft C and C++ IntelliSense and debugging.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ms-vscode.cpptools',
+    requires: ['vscode'],
+    sizeMb: 60,
+  },
+  {
+    id: 'ext-jupyter',
+    name: 'Jupyter',
+    description: 'Run notebooks with kernels, plots and interactive cells.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ms-toolsai.jupyter',
+    requires: ['vscode'],
+    sizeMb: 40,
+  },
+  {
+    id: 'ext-live-server',
+    name: 'Live Server',
+    description: 'Local dev server with live reload for static pages.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ritwickdey.LiveServer',
+    requires: ['vscode'],
+    sizeMb: 1,
+  },
+  {
+    id: 'ext-remote-wsl',
+    name: 'WSL',
+    description: 'Open any WSL folder as a full VS Code workspace.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ms-vscode-remote.remote-wsl',
+    requires: ['vscode'],
+    sizeMb: 2,
+  },
+  {
+    id: 'ext-remote-ssh',
+    name: 'Remote - SSH',
+    description: 'Develop on a remote machine over SSH from local VS Code.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'ms-vscode-remote.remote-ssh',
+    requires: ['vscode'],
+    sizeMb: 2,
+  },
+  {
+    id: 'ext-material-icons',
+    name: 'Material Icon Theme',
+    description: 'File and folder icons for the explorer.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'PKief.material-icon-theme',
+    requires: ['vscode'],
+    sizeMb: 10,
+  },
+  {
+    id: 'ext-one-dark-pro',
+    name: 'One Dark Pro',
+    description: 'The Atom One Dark colour theme.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'zhuangtongfa.material-theme',
+    requires: ['vscode'],
+    sizeMb: 5,
+  },
+  {
+    id: 'ext-catppuccin',
+    name: 'Catppuccin',
+    description: 'Soothing pastel colour theme in four flavours.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'Catppuccin.catppuccin-vsc',
+    requires: ['vscode'],
+    sizeMb: 2,
+  },
+  {
+    id: 'ext-tokyo-night',
+    name: 'Tokyo Night',
+    description: 'Dark colour theme drawn from downtown Tokyo at night.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'enkia.tokyo-night',
+    requires: ['vscode'],
+    sizeMb: 1,
+  },
+  {
+    id: 'ext-svelte',
+    name: 'Svelte',
+    description: 'Svelte language support and the official language server.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'svelte.svelte-vscode',
+    requires: ['vscode'],
+    sizeMb: 15,
+  },
+  {
+    id: 'ext-vue',
+    name: 'Vue (Official)',
+    description: 'Vue language support, the extension once known as Volar.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'Vue.volar',
+    requires: ['vscode'],
+    sizeMb: 15,
+  },
+  {
+    id: 'ext-prisma',
+    name: 'Prisma',
+    description: 'Schema syntax, formatting and completion for Prisma ORM.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'Prisma.prisma',
+    requires: ['vscode'],
+    sizeMb: 10,
+  },
+  {
+    id: 'ext-astro',
+    name: 'Astro',
+    description: 'Language support for .astro files and components.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'astro-build.astro-vscode',
+    requires: ['vscode'],
+    sizeMb: 5,
+  },
+  {
+    id: 'ext-biome',
+    name: 'Biome',
+    description: 'Format and lint JavaScript and TypeScript with Biome.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'biomejs.biome',
+    requires: ['vscode'],
+    sizeMb: 15,
+  },
+  {
+    id: 'ext-dotenv',
+    name: 'DotENV',
+    description: 'Syntax highlighting for .env files.',
+    category: 'extensions',
+    installer: 'vscode',
+    ref: 'mikestead.dotenv',
+    requires: ['vscode'],
+    sizeMb: 1,
+  },
 
   // --- fonts ---
   {
@@ -718,6 +1343,43 @@ export const catalog: Item[] = [
     ref: 'https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip',
     sizeMb: 124,
     note: 'Supplies the glyphs that starship, eza and lazygit render.',
+  },
+  {
+    id: 'font-hack',
+    name: 'Hack',
+    description: 'Workhorse monospace typeface, no ligatures, very legible.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://github.com/source-foundry/Hack/releases/download/v3.003/Hack-v3.003-ttf.zip',
+    sizeMb: 1,
+  },
+  {
+    id: 'font-iosevka',
+    name: 'Iosevka',
+    description: 'Narrow monospace typeface that fits more columns on screen.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://github.com/be5invis/Iosevka/releases/download/v34.8.0/PkgTTF-Iosevka-34.8.0.zip',
+    sizeMb: 158,
+  },
+  {
+    id: 'font-victor-mono',
+    name: 'Victor Mono',
+    description: 'Monospace typeface with cursive italics and ligatures.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://rubjo.github.io/victor-mono/VictorMonoAll.zip',
+    sizeMb: 9,
+  },
+  {
+    id: 'font-meslo-nerd',
+    name: 'MesloLG Nerd Font',
+    description: 'Meslo patched with the Nerd Fonts icon set.',
+    category: 'fonts',
+    installer: 'font',
+    ref: 'https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Meslo.zip',
+    sizeMb: 107,
+    note: 'The font Powerlevel10k and oh-my-posh themes expect.',
   },
 
   // --- linux ---
