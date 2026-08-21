@@ -313,10 +313,31 @@ export default function Page() {
   // Which slice is on screen. Read from the same URL the selection lives in,
   // in its own parameters, so a link reproduces the view as well as the kit.
   const { category, provider, pack: packSlug, q } = readView(params);
-  const entries = useMemo(() => categoryEntries(catalog), []);
+
+  // Everything the rail advertises derives from what the chosen target can
+  // actually install. Counting the full catalog put a "3" next to a Linux
+  // category that filtered to zero on the Linux target — the category is the
+  // WSL distros, which are a Windows feature. `categoryEntries` already drops
+  // empty categories, so on Linux that entry simply does not exist.
+  const targetCatalog = useMemo(
+    () => (linux ? catalog.filter(linuxSupported) : catalog),
+    [linux],
+  );
+  const entries = useMemo(
+    () => categoryEntries(targetCatalog),
+    [targetCatalog],
+  );
+
+  // The URL may still name a category this target does not offer (switching
+  // to Linux while on the WSL category). Falling back to ALL keeps the rail
+  // highlight, the counts and the grid all describing the same thing.
+  const activeCategory = entries.some((entry) => entry.id === category)
+    ? category
+    : ALL;
+
   const inCategory = useMemo(
-    () => filterItems(catalog, category, ALL),
-    [category],
+    () => filterItems(targetCatalog, activeCategory, ALL),
+    [targetCatalog, activeCategory],
   );
   const providers = useMemo(() => providersOf(inCategory), [inCategory]);
 
@@ -337,16 +358,17 @@ export default function Page() {
     };
   }, [packSlug, linux]);
 
+  // On the Linux target, items with no Linux install are dropped from the
+  // grid instead of shown greyed out: a card that can only say "not available"
+  // is noise, and the kit already reports how many selected items the target
+  // drops. Selections are untouched — hiding is a view. The browse path gets
+  // this for free from `targetCatalog`; a preview's items still need it.
   const visible = useMemo(() => {
-    const base = preview
-      ? preview.items
-      : searchItems(filterItems(inCategory, ALL, provider), q);
-    // On the Linux target, items with no Linux install are dropped from the
-    // grid instead of shown greyed out: a card that can only say "not
-    // available" is noise, and the kit already reports how many selected
-    // items the target drops. Selections are untouched — hiding is a view.
-    return linux ? base.filter(linuxSupported) : base;
-  }, [preview, inCategory, provider, q, linux]);
+    if (preview) {
+      return linux ? preview.items.filter(linuxSupported) : preview.items;
+    }
+    return searchItems(filterItems(inCategory, ALL, provider), q);
+  }, [preview, linux, inCategory, provider, q]);
 
   // A dependency the preview pulled in is marked as one even when the kit has
   // not got it yet — that is the "and here is what comes with it" the preview
@@ -461,7 +483,7 @@ export default function Page() {
         <div className="grid grid-cols-1 items-start gap-6 lg:min-h-0 lg:grow lg:grid-cols-[216px_minmax(0,1fr)_300px] lg:grid-rows-[minmax(0,1fr)] lg:items-stretch lg:pb-4">
           <CategoryRail
             entries={entries}
-            selected={category}
+            selected={activeCategory}
             onSelect={setCategory}
           />
 
@@ -473,7 +495,7 @@ export default function Page() {
               own results are controls the user has to go find again. */}
           <div
             className="relative flex min-w-0 flex-col lg:min-h-0"
-            style={{ "--cat": categoryHue(category) } as CSSProperties}
+            style={{ "--cat": categoryHue(activeCategory) } as CSSProperties}
           >
             <div className="shrink-0">
               <SearchBox value={q} onChange={setQuery} />
