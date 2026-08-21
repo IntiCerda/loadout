@@ -233,7 +233,10 @@ export function KitSidebar({
           // lock — they leave when the item that needed them does.
           <ul
             aria-label="Items in your kit"
-            className="border-border/60 mt-4 flex flex-col gap-0.5 border-t pt-3"
+            // Capped at roughly nine rows, then it scrolls itself: a big kit
+            // must not push the download button below the fold — the list is
+            // the receipt, the button is the point.
+            className="border-border/60 mt-4 flex max-h-64 flex-col gap-0.5 overflow-y-auto border-t pt-3"
           >
             {items.map((item) => {
               const locked = requiredIds.has(item.id);
