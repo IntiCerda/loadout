@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Download, HardDrive } from "lucide-react";
+import { Check, Copy, Download, HardDrive, Lock, X } from "lucide-react";
 import type { Item, Os } from "@/lib/types";
 import { formatSize } from "@/lib/resolve";
 
@@ -21,6 +21,8 @@ const OS_ORDER: Os[] = ["windows", "linux"];
 type Props = {
   /** Only what the chosen target can install. */
   items: Item[];
+  /** Ids pulled in by `requires` — removable only via what needs them. */
+  requiredIds: Set<string>;
   /** How many selected items the chosen target has to drop. */
   droppedCount: number;
   sizeMb: number;
@@ -30,6 +32,7 @@ type Props = {
   origin: string;
   os: Os;
   onOsChange: (os: Os) => void;
+  onRemove: (id: string) => void;
 };
 
 type CopyStatus = "idle" | "copied" | "failed";
@@ -45,12 +48,14 @@ const CTA =
 
 export function KitSidebar({
   items,
+  requiredIds,
   droppedCount,
   sizeMb,
   query,
   origin,
   os,
   onOsChange,
+  onRemove,
 }: Props) {
   const [status, setStatus] = useState<CopyStatus>("idle");
   const empty = items.length === 0;
@@ -99,7 +104,7 @@ export function KitSidebar({
       // this column scrolls, that box's static position extended the
       // DOCUMENT's scroll area past the fixed shell, unclippable by any
       // ancestor overflow because none of them was its containing block.
-      className="app-scroll relative lg:min-h-0 lg:overflow-y-auto"
+      className="relative lg:min-h-0 lg:overflow-y-auto"
     >
       <div className="surface border-border bg-primary relative overflow-hidden rounded-xl border p-5">
         {/* Accent hairline along the top edge, matching the item cards, so the
@@ -205,6 +210,81 @@ export function KitSidebar({
             }}
           />
         </div>
+
+        {empty ? null : (
+          // The kit itself, not just its totals: what a stranger checks before
+          // running anything is "what exactly is in this". Dependencies show a
+          // lock — they leave when the item that needed them does.
+          <ul
+            aria-label="Items in your kit"
+            className="border-border/60 mt-4 flex flex-col gap-0.5 border-t pt-3"
+          >
+            {items.map((item) => {
+              const locked = requiredIds.has(item.id);
+              return (
+                <li
+                  key={item.id}
+                  className="group/row flex min-w-0 items-center gap-2 rounded-md px-1 py-1 text-sm"
+                >
+                  <span
+                    aria-hidden
+                    className="bg-muted text-foreground/80 relative flex size-5 shrink-0 items-center justify-center rounded-[5px] font-mono text-[10px] font-bold"
+                  >
+                    {item.name[0]}
+                    {/* eslint-disable-next-line @next/next/no-img-element -- same
+                        static-PNG case as the card's logo */}
+                    <img
+                      src={`/logos/${item.id}.png`}
+                      alt=""
+                      width={20}
+                      height={20}
+                      loading="lazy"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                      ref={(img) => {
+                        if (img?.complete && img.naturalWidth === 0) {
+                          img.style.display = "none";
+                        }
+                      }}
+                      className={`absolute inset-0 size-5 rounded-[5px] object-contain ${
+                        item.logoOnLight ? "bg-foreground p-px" : "bg-muted"
+                      }`}
+                    />
+                  </span>
+                  <span className="min-w-0 grow truncate">{item.name}</span>
+                  {item.sizeMb ? (
+                    <span className="text-foreground/50 shrink-0 font-mono text-xs">
+                      {formatSize(item.sizeMb)}
+                    </span>
+                  ) : null}
+                  {locked ? (
+                    <span
+                      className="text-foreground/50 flex size-6 shrink-0 items-center justify-center"
+                      title="Required by another item"
+                    >
+                      <Lock className="size-3" aria-hidden />
+                      <span className="sr-only">required by another item</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label={`Remove ${item.name}`}
+                      onClick={() => onRemove(item.id)}
+                      className="text-foreground/50 hover:bg-destructive/15 hover:text-warning flex
+                        size-6 shrink-0 cursor-pointer items-center justify-center rounded
+                        transition-colors duration-150
+                        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      <X className="size-3.5" aria-hidden />
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
         <div className="mt-5 flex flex-col gap-2">
           {empty ? (

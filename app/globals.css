@@ -52,7 +52,10 @@
      or lighter surfaces, so darkening the ground can only raise them. */
   --background: #0b1120;
   --foreground: #f8fafc;
-  --primary: #1e293b;
+  /* A step darker than the plan's #1e293b: with the ground at #0b1120 the
+     original read lighter than intended next to it. Text on this surface only
+     gains contrast from the darkening. */
+  --primary: #182236;
   --primary-foreground: #ffffff; /* the plan's --color-on-primary */
   --secondary: #334155;
   --accent: #22c55e;
@@ -62,9 +65,9 @@
 
   /* Derived from the palette. The plan does not name these, but the shadcn
      components read them, and an undefined value renders as transparent. */
-  --card: #1e293b;
+  --card: #182236;
   --card-foreground: #f8fafc;
-  --popover: #1e293b;
+  --popover: #182236;
   --popover-foreground: #f8fafc;
   --secondary-foreground: #f8fafc;
   --muted-foreground: #94a3b8;
@@ -171,19 +174,31 @@
   }
 }
 
-/* Depth for the app zone, which is otherwise a flat #0f172a slab: two large
-   radial glows echoing the hero's ambient light, over a ~3%-opacity dot grid.
-   Background layers only — nothing enters the accessibility tree. */
+/* Depth for the app zone, which is otherwise a flat slab: two large radial
+   glows echoing the hero's ambient light, over a low-opacity dot grid. Painted
+   on a pseudo-element so a mask can fade the whole treatment in over the first
+   140px — painted on the element itself it starts at full strength on the
+   zone's top edge, which reads as a hard seam right under the hero. Background
+   only; nothing enters the accessibility tree. */
 .app-zone {
+  position: relative;
+}
+
+.app-zone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background-image:
     radial-gradient(
       50% 40% at 18% 0%,
-      color-mix(in srgb, var(--accent) 9%, transparent),
+      color-mix(in srgb, var(--accent) 8%, transparent),
       transparent
     ),
     radial-gradient(
       50% 45% at 85% 100%,
-      color-mix(in srgb, #0ea5e9 9%, transparent),
+      color-mix(in srgb, #0ea5e9 8%, transparent),
       transparent
     ),
     radial-gradient(
@@ -194,26 +209,36 @@
     auto,
     auto,
     24px 24px;
+  mask-image: linear-gradient(180deg, transparent, black 140px);
 }
 
-/* Internal scrollers of the fixed-height shell. Without this the grid column
-   grows a full-width grey OS scrollbar down the middle of the page. */
-.app-scroll {
+/* Every scroller shares one quiet bar: thin, themed thumb, no track, and no
+   stepper arrows — on Windows the default is a full-height white gutter with
+   buttons, which is louder than any content it sits next to. The Firefox pair
+   (`scrollbar-*`) and the WebKit pseudo-elements style the same thing. */
+* {
   scrollbar-width: thin;
-  scrollbar-color: var(--secondary) transparent;
+  scrollbar-color: color-mix(in srgb, var(--secondary) 75%, transparent)
+    transparent;
 }
 
-.app-scroll::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
+  background: transparent;
 }
 
-.app-scroll::-webkit-scrollbar-thumb {
-  background: var(--secondary);
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--secondary) 75%, transparent);
   border-radius: 4px;
 }
 
-.app-scroll::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: transparent;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
 }
 
 /* Raised-surface treatment for card-like containers. Depth on a dark theme
@@ -224,11 +249,11 @@
 .surface {
   background-image: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--foreground) 4%, transparent),
+    color-mix(in srgb, var(--foreground) 2.5%, transparent),
     transparent 45%
   );
   box-shadow:
-    inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 7%, transparent),
+    inset 0 1px 0 0 color-mix(in srgb, var(--foreground) 5%, transparent),
     0 12px 32px -16px rgb(0 0 0 / 0.55);
 }
 

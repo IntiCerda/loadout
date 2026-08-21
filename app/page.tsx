@@ -426,7 +426,7 @@ export default function Page() {
           {/* `--cat` is the current category's hue; the provider chips inside
               read it for their active state. Cards set their own per item. */}
           <div
-            className="app-scroll relative min-w-0 lg:min-h-0 lg:overflow-y-auto lg:pr-1"
+            className="relative min-w-0 lg:min-h-0 lg:overflow-y-auto lg:pr-1"
             style={{ "--cat": categoryHue(category) } as CSSProperties}
           >
             <ProviderChips
@@ -449,12 +449,14 @@ export default function Page() {
 
           <KitSidebar
             items={installable}
+            requiredIds={requiredSet}
             droppedCount={resolved.length - installable.length}
             sizeMb={sizeMb}
             query={query}
             origin={origin}
             os={os}
             onOsChange={setOs}
+            onRemove={toggle}
           />
           </div>
         </main>

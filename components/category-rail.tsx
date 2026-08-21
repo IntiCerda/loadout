@@ -55,7 +55,7 @@ export function CategoryRail({ entries, selected, onSelect }: Props) {
       // A full-height column of the fixed shell at `lg`, scrolling itself in
       // the rare viewport too short for nine entries. Below `lg` it is a
       // horizontal scroller in normal flow.
-      className="app-scroll min-w-0 lg:min-h-0 lg:overflow-y-auto"
+      className="min-w-0 lg:min-h-0 lg:overflow-y-auto"
     >
       <h2 className="text-muted-foreground mb-2 px-3 font-mono text-xs tracking-widest uppercase">
         Categories
@@ -86,7 +86,7 @@ export function CategoryRail({ entries, selected, onSelect }: Props) {
                 ${
                   active
                     ? "border-l-[var(--cat)] bg-[color-mix(in_srgb,var(--cat)_10%,var(--primary))] text-foreground"
-                    : "border-l-transparent text-foreground/80 hover:bg-primary/60"
+                    : "border-l-transparent text-foreground/80 hover:bg-[color-mix(in_srgb,var(--cat)_7%,transparent)]"
                 }`}
             >
               <Icon

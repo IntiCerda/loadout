@@ -157,7 +157,11 @@ export function ItemCard({
         <span
           aria-hidden
           className={`flex size-5 shrink-0 items-center justify-center rounded border transition-colors duration-[180ms]
-            ${active ? "border-accent bg-accent text-accent-foreground" : "border-border"}`}
+            ${
+              active
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border group-hover:border-[color-mix(in_srgb,var(--cat)_50%,var(--border))]"
+            }`}
         >
           {locked ? (
             <Lock className="size-3" />
