@@ -159,7 +159,7 @@ export function KitSidebar({
                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
                 ${
                   os === value
-                    ? "bg-secondary text-foreground"
+                    ? "bg-[color-mix(in_srgb,var(--accent)_12%,var(--secondary))] text-foreground"
                     : "text-foreground/60 hover:bg-secondary/40"
                 }`}
             >

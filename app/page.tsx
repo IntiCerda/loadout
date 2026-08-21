@@ -484,7 +484,11 @@ export default function Page() {
               />
             </div>
 
-            <div className="min-w-0 lg:min-h-0 lg:grow lg:overflow-y-auto lg:pr-1">
+            {/* `scrollbar-gutter: stable` keeps the grid's width constant
+                whether or not the current slice is tall enough to scroll —
+                without it, switching filters makes every card snap 8px wider
+                and back as the scrollbar appears and disappears. */}
+            <div className="min-w-0 lg:min-h-0 lg:grow lg:overflow-y-auto lg:pr-1 lg:[scrollbar-gutter:stable]">
               {visible.length === 0 ? (
                 <p className="text-foreground/60 py-10 text-center text-sm">
                   {q.trim()
