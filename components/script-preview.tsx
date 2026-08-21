@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown, FileCode2 } from "lucide-react";
+import { Check, ChevronDown, Copy, FileCode2 } from "lucide-react";
 import type { Os } from "@/lib/types";
 
 /**
@@ -89,11 +89,25 @@ function tokenize(script: string): Token[] {
 
 export function ScriptPreview({ script, os }: { script: string; os: Os }) {
   const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Tokenising a script nobody has opened is wasted work, and the panel is
   // collapsed by default.
   const tokens = useMemo(() => (open ? tokenize(script) : []), [open, script]);
   const lineCount = useMemo(() => script.split("\n").length, [script]);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(script);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard refused (insecure origin, unfocused document, permission).
+      // The whole script is selectable text right below, so the honest
+      // fallback is already on screen; swallowing the rejection just keeps it
+      // from surfacing as an unhandled promise.
+    }
+  };
 
   return (
     // Full width, not inside the 320px sidebar. The generated PowerShell has
@@ -102,28 +116,51 @@ export function ScriptPreview({ script, os }: { script: string; os: Os }) {
     // feature this product is built around -- read it before you run it -- was
     // rendered in a column too narrow to read it in.
     <div className="surface border-border bg-primary rounded-xl border p-4 sm:p-5">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-controls="script-body"
-        className="hover:text-accent focus-visible:outline-ring flex min-h-[44px] w-full
-          cursor-pointer items-center justify-between gap-3 rounded-lg px-1 text-left
-          font-medium transition-colors duration-200
-          focus-visible:outline-2 focus-visible:outline-offset-2"
-      >
-        <span className="flex items-center gap-2">
-          <FileCode2 className="text-accent size-4 shrink-0" aria-hidden />
-          {open ? "Hide the generated script" : "View the generated script"}
-        </span>
-        <span className="text-foreground/50 flex items-center gap-2 font-mono text-xs">
-          {lineCount} lines
-          <ChevronDown
-            aria-hidden
-            className={`size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          />
-        </span>
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          aria-expanded={open}
+          aria-controls="script-body"
+          className="hover:text-accent focus-visible:outline-ring flex min-h-[44px] grow
+            cursor-pointer items-center justify-between gap-3 rounded-lg px-1 text-left
+            font-medium transition-colors duration-200
+            focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <span className="flex items-center gap-2">
+            <FileCode2 className="text-accent size-4 shrink-0" aria-hidden />
+            {open ? "Hide the generated script" : "View the generated script"}
+          </span>
+          <span className="text-foreground/50 flex items-center gap-2 font-mono text-xs">
+            {lineCount} lines
+            <ChevronDown
+              aria-hidden
+              className={`size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            />
+          </span>
+        </button>
+
+        {open ? (
+          // Outside the toggle, not nested in it — a button inside a button is
+          // invalid HTML and splits the click. Only rendered with the panel:
+          // copying a script you cannot see is not a real action.
+          <button
+            type="button"
+            onClick={copy}
+            className="border-border text-foreground/70 hover:border-secondary hover:bg-secondary/40
+              hover:text-foreground flex min-h-[36px] shrink-0 cursor-pointer items-center gap-1.5
+              rounded-lg border px-2.5 font-mono text-xs transition-colors duration-200
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            {copied ? (
+              <Check className="text-accent size-3.5" aria-hidden />
+            ) : (
+              <Copy className="size-3.5" aria-hidden />
+            )}
+            {copied ? "Copied" : "Copy"}
+          </button>
+        ) : null}
+      </div>
 
       {open ? (
         // The tokens are spans directly inside <pre>, not one <div> per line.

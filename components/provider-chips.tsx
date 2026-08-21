@@ -19,11 +19,17 @@ export function ProviderChips({ providers, selected, onSelect }: Props) {
 
   return (
     <div
-      className="mb-4 flex flex-wrap items-center gap-2"
+      // One scrolling line, like the preset row above it: inside the fixed
+      // shell every wrapped row is grid height spent for the whole session.
+      // The mask fades the right edge as the "there is more" cue; trailing
+      // padding keeps the last chip clear of the fade at scroll end.
+      className="mb-4 flex items-center gap-2 overflow-x-auto p-1 pr-10 [mask-image:linear-gradient(90deg,black_calc(100%-40px),transparent)]"
       role="group"
       aria-label="Filter by provider"
     >
-      <span className="text-muted-foreground mr-1 text-sm">Provider</span>
+      <span className="text-muted-foreground mr-1 shrink-0 text-sm">
+        Provider
+      </span>
 
       {[ALL, ...providers].map((provider) => {
         const active = provider === selected;
@@ -35,7 +41,7 @@ export function ProviderChips({ providers, selected, onSelect }: Props) {
             type="button"
             aria-current={active ? "true" : undefined}
             onClick={() => onSelect(provider)}
-            className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border px-3
+            className={`flex min-h-[44px] shrink-0 cursor-pointer items-center gap-2 rounded-lg border px-3
               text-sm transition-colors duration-[180ms]
               focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
               ${
@@ -49,7 +55,11 @@ export function ProviderChips({ providers, selected, onSelect }: Props) {
           >
             <span
               aria-hidden
-              className="bg-secondary text-foreground flex size-5 items-center justify-center rounded font-mono text-[10px] font-bold"
+              className={`text-foreground flex size-5 items-center justify-center rounded font-mono text-[10px] font-bold ${
+                active
+                  ? "bg-[color-mix(in_srgb,var(--cat)_30%,var(--secondary))]"
+                  : "bg-secondary"
+              }`}
             >
               {label[0]}
             </span>

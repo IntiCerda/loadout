@@ -1,13 +1,17 @@
 "use client";
 
 import { Plus, Trash2, X } from "lucide-react";
+import type { Item } from "@/lib/types";
 import { formatSize } from "@/lib/resolve";
+
+/** Logos shown before the count collapses the rest into a `+N`. */
+const MAX_LOGOS = 6;
 
 type Props = {
   /** Display name of the pack being previewed. */
   name: string;
-  /** Resolved item count — what the grid below is showing. */
-  count: number;
+  /** Resolved items — what the grid below is showing. */
+  items: Item[];
   /** Download total for the resolved items the current target can install. */
   sizeMb: number;
   /** True when every id the pack contributes is already in the kit. */
@@ -28,14 +32,57 @@ const ACTION =
  */
 export function PackPreviewBar({
   name,
-  count,
+  items,
   sizeMb,
   applied,
   onConfirm,
   onExit,
 }: Props) {
+  const count = items.length;
+  const shown = items.slice(0, MAX_LOGOS);
+
   return (
     <div className="surface border-accent/40 bg-primary mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-xl border p-3 sm:p-4">
+      {/* The pack's faces, overlapping like an avatar stack. Decorative — the
+          sentence beside it carries the count, and the grid below is the full
+          list. Monogram-under-logo, same trick as the cards. */}
+      <span aria-hidden className="flex shrink-0 -space-x-1.5">
+        {shown.map((item) => (
+          <span
+            key={item.id}
+            className="bg-muted ring-primary text-foreground/80 relative flex size-6 items-center justify-center rounded-md font-mono text-[10px] font-bold ring-2"
+          >
+            {item.name[0]}
+            {/* eslint-disable-next-line @next/next/no-img-element -- same
+                static-PNG case as the card's logo */}
+            <img
+              src={`/logos/${item.id}.png`}
+              alt=""
+              width={24}
+              height={24}
+              loading="lazy"
+              decoding="async"
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+              }}
+              ref={(img) => {
+                if (img?.complete && img.naturalWidth === 0) {
+                  img.style.display = "none";
+                }
+              }}
+              className={`absolute inset-0 size-6 rounded-md object-contain ${
+                item.logoOnLight ? "bg-foreground p-0.5" : "bg-muted"
+              }`}
+            />
+          </span>
+        ))}
+        {count > MAX_LOGOS ? (
+          <span className="bg-secondary ring-primary text-foreground/80 relative flex size-6 items-center justify-center rounded-md font-mono text-[10px] ring-2">
+            +{count - MAX_LOGOS}
+          </span>
+        ) : null}
+      </span>
+
       {/* No live region on this sentence. The bar mounts and unmounts with
           the preview, and a live region inserted at the same moment as its
           text is announced unreliably; `app/page.tsx` keeps a permanent

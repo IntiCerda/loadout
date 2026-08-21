@@ -397,7 +397,7 @@ export default function Page() {
           {preview ? (
             <PackPreviewBar
               name={preview.pack.name}
-              count={preview.items.length}
+              items={preview.items}
               sizeMb={preview.sizeMb}
               applied={packApplied(preview.pack.items, selectedSet)}
               onConfirm={() => applyPack(preview.pack.items)}
