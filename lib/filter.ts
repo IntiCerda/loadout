@@ -81,6 +81,32 @@ export function filterItems(
 }
 
 /**
+ * Search text from the query string. Length-capped so a hostile link cannot
+ * carry an absurd payload into the input; no other validation, because any
+ * text is a legitimate thing to have searched for.
+ */
+export function readQuery(raw: string | null): string {
+  return (raw ?? '').slice(0, 100)
+}
+
+/**
+ * Free-text filter over what the rail and chips already narrowed. Matches
+ * name, id, description and provider, case-insensitively. An empty or
+ * whitespace query filters nothing — the grid never goes blank just because
+ * the box was focused and abandoned.
+ */
+export function searchItems(items: Item[], query: string): Item[] {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return items
+  return items.filter((item) =>
+    [item.name, item.id, item.description, item.provider ?? '']
+      .join('\n')
+      .toLowerCase()
+      .includes(needle),
+  )
+}
+
+/**
  * Pack slug from the query string, validated against the packs that exist.
  * Anything else is `null` — a stale or hand-edited `?pack=` renders the plain
  * catalog rather than a preview of nothing.

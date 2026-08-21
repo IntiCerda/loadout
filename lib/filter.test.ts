@@ -8,6 +8,8 @@ import {
   readCategory,
   readPack,
   readProvider,
+  readQuery,
+  searchItems,
 } from './filter'
 import type { Item, Pack } from './types'
 
@@ -164,5 +166,44 @@ describe('packApplied', () => {
 
   it('ignores selections the pack does not contain', () => {
     expect(packApplied(['a'], new Set(['a', 'z']))).toBe(true)
+  })
+})
+
+describe('readQuery', () => {
+  it('passes text through', () => {
+    expect(readQuery('rip grep')).toBe('rip grep')
+  })
+
+  it('is empty for an absent parameter', () => {
+    expect(readQuery(null)).toBe('')
+  })
+
+  it('caps a hostile payload at 100 characters', () => {
+    expect(readQuery('x'.repeat(5000))).toHaveLength(100)
+  })
+})
+
+describe('searchItems', () => {
+  const searchable: Item[] = [
+    { ...base, id: 'ripgrep', name: 'ripgrep', description: 'Recursive regex search.', category: 'tools' },
+    { ...base, id: 'q14', name: 'Qwen2.5 14B', description: 'Coding model.', category: 'ai-models', provider: 'Alibaba' },
+  ]
+
+  it('filters nothing on an empty or whitespace query', () => {
+    expect(searchItems(searchable, '')).toEqual(searchable)
+    expect(searchItems(searchable, '   ')).toEqual(searchable)
+  })
+
+  it('matches the name case-insensitively', () => {
+    expect(searchItems(searchable, 'RIPGREP').map((i) => i.id)).toEqual(['ripgrep'])
+  })
+
+  it('matches description and provider text', () => {
+    expect(searchItems(searchable, 'regex').map((i) => i.id)).toEqual(['ripgrep'])
+    expect(searchItems(searchable, 'alibaba').map((i) => i.id)).toEqual(['q14'])
+  })
+
+  it('returns nothing when nothing matches', () => {
+    expect(searchItems(searchable, 'zzz-no-match')).toEqual([])
   })
 })

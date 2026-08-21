@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Download, HardDrive, Lock, X } from "lucide-react";
+import { Check, Copy, Download, HardDrive, Lock, Trash2, X } from "lucide-react";
 import type { Item, Os } from "@/lib/types";
 import { formatSize } from "@/lib/resolve";
 
@@ -33,6 +33,7 @@ type Props = {
   os: Os;
   onOsChange: (os: Os) => void;
   onRemove: (id: string) => void;
+  onClear: () => void;
 };
 
 type CopyStatus = "idle" | "copied" | "failed";
@@ -56,6 +57,7 @@ export function KitSidebar({
   os,
   onOsChange,
   onRemove,
+  onClear,
 }: Props) {
   const [status, setStatus] = useState<CopyStatus>("idle");
   const empty = items.length === 0;
@@ -116,12 +118,26 @@ export function KitSidebar({
         {/* Not `/40`: this heading names the landmark and the whole panel, so
             it is essential copy. `/40` measures 3.50:1 on this card and fails
             AA; `/60` is 6.00:1. */}
-        <h2
-          id="kit-heading"
-          className="text-foreground/60 font-mono text-xs tracking-widest uppercase"
-        >
-          Your kit
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2
+            id="kit-heading"
+            className="text-foreground/60 font-mono text-xs tracking-widest uppercase"
+          >
+            Your kit
+          </h2>
+          {empty ? null : (
+            <button
+              type="button"
+              onClick={onClear}
+              className="text-foreground/60 hover:text-warning flex min-h-[24px] cursor-pointer
+                items-center gap-1 rounded font-mono text-xs transition-colors duration-150
+                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <Trash2 className="size-3.5" aria-hidden />
+              Clear
+            </button>
+          )}
+        </div>
 
         {/* Toggle buttons in a labelled group, not `role="radiogroup"`. A
             radio group owes the user arrow-key navigation and a roving

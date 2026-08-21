@@ -26,6 +26,8 @@ import {
   readCategory,
   readPack,
   readProvider,
+  readQuery,
+  searchItems,
 } from "@/lib/filter";
 import { SITE_URL } from "@/lib/brand";
 import { categoryHue } from "@/lib/hues";
@@ -38,6 +40,7 @@ import { PackChips } from "@/components/pack-chips";
 import { PackPreviewBar } from "@/components/pack-preview-bar";
 import { KitSidebar } from "@/components/kit-sidebar";
 import { ScriptPreview } from "@/components/script-preview";
+import { SearchBox } from "@/components/search-box";
 
 /**
  * `history.replaceState` fires no event, so selection changes announce
@@ -70,7 +73,12 @@ function readOs(params: URLSearchParams): Os {
  * from the live URL inside every writer — and it is a view, not a selection:
  * entering and leaving a preview never touches `?p=`.
  */
-type View = { category: string; provider: string; pack: string | null };
+type View = {
+  category: string;
+  provider: string;
+  pack: string | null;
+  q: string;
+};
 
 function readView(params: URLSearchParams): View {
   const category = readCategory(params.get("cat"));
@@ -81,6 +89,7 @@ function readView(params: URLSearchParams): View {
       filterItems(catalog, category, ALL),
     ),
     pack: readPack(params.get("pack"), packs),
+    q: readQuery(params.get("q")),
   };
 }
 
@@ -98,6 +107,7 @@ function hrefFor(ids: string[], os: Os, view: View): string {
     view.category === ALL ? "" : `cat=${encodeURIComponent(view.category)}`,
     view.provider === ALL ? "" : `prov=${encodeURIComponent(view.provider)}`,
     view.pack ? `pack=${encodeURIComponent(view.pack)}` : "",
+    view.q.trim() ? `q=${encodeURIComponent(view.q)}` : "",
   ].filter(Boolean);
   return parts.length
     ? `${window.location.pathname}?${parts.join("&")}`
@@ -172,6 +182,9 @@ export default function Page() {
         category,
         provider: ALL,
         pack: null,
+        // The search survives a category change: the box visibly holds its
+        // text, so silently discarding it would contradict the screen.
+        q: readQuery(live.get("q")),
       });
     },
     [commit],
@@ -184,6 +197,21 @@ export default function Page() {
         category: readCategory(live.get("cat")),
         provider,
         pack: null,
+        q: readQuery(live.get("q")),
+      });
+    },
+    [commit],
+  );
+
+  const setQuery = useCallback(
+    (q: string) => {
+      const live = new URLSearchParams(window.location.search);
+      commit(parseIds(live.get("p")), readOs(live), {
+        ...readView(live),
+        // Typing is a request to search the catalog, so it closes a preview
+        // the same way the rail does.
+        pack: null,
+        q,
       });
     },
     [commit],
@@ -200,14 +228,22 @@ export default function Page() {
     [update],
   );
 
+  const clearKit = useCallback(() => {
+    update(() => []);
+  }, [update]);
+
   // Opening and closing a preview writes only `pack`; the selection goes back
   // into the URL exactly as it came out.
   const setPreview = useCallback(
     (slug: string | null) => {
       const live = new URLSearchParams(window.location.search);
+      const view = readView(live);
       commit(parseIds(live.get("p")), readOs(live), {
-        ...readView(live),
+        ...view,
         pack: slug,
+        // Opening a preview clears the search: the grid is about to show the
+        // pack, and a search box still holding text would claim otherwise.
+        q: slug ? "" : view.q,
       });
     },
     [commit],
@@ -276,7 +312,7 @@ export default function Page() {
 
   // Which slice is on screen. Read from the same URL the selection lives in,
   // in its own parameters, so a link reproduces the view as well as the kit.
-  const { category, provider, pack: packSlug } = readView(params);
+  const { category, provider, pack: packSlug, q } = readView(params);
   const entries = useMemo(() => categoryEntries(catalog), []);
   const inCategory = useMemo(
     () => filterItems(catalog, category, ALL),
@@ -301,10 +337,16 @@ export default function Page() {
     };
   }, [packSlug, linux]);
 
-  const visible = useMemo(
-    () => (preview ? preview.items : filterItems(inCategory, ALL, provider)),
-    [preview, inCategory, provider],
-  );
+  const visible = useMemo(() => {
+    const base = preview
+      ? preview.items
+      : searchItems(filterItems(inCategory, ALL, provider), q);
+    // On the Linux target, items with no Linux install are dropped from the
+    // grid instead of shown greyed out: a card that can only say "not
+    // available" is noise, and the kit already reports how many selected
+    // items the target drops. Selections are untouched — hiding is a view.
+    return linux ? base.filter(linuxSupported) : base;
+  }, [preview, inCategory, provider, q, linux]);
 
   // A dependency the preview pulled in is marked as one even when the kit has
   // not got it yet — that is the "and here is what comes with it" the preview
@@ -424,27 +466,47 @@ export default function Page() {
           />
 
           {/* `--cat` is the current category's hue; the provider chips inside
-              read it for their active state. Cards set their own per item. */}
+              read it for their active state. Cards set their own per item.
+
+              Search and chips sit OUTSIDE the scrolling box: they are the
+              controls over the grid, and controls that scroll away with their
+              own results are controls the user has to go find again. */}
           <div
-            className="relative min-w-0 lg:min-h-0 lg:overflow-y-auto lg:pr-1"
+            className="relative flex min-w-0 flex-col lg:min-h-0"
             style={{ "--cat": categoryHue(category) } as CSSProperties}
           >
-            <ProviderChips
-              providers={providers}
-              selected={provider}
-              onSelect={setProvider}
-            />
-            {/* Remounts the grid whenever the filter changes, which is what
-                replays the staggered entrance. Toggling an item does not change
-                the key, so the cards stay put while you build a kit. */}
-            <CatalogGrid
-              key={`${packSlug ?? ""}:${category}:${provider}`}
-              items={visible}
-              selectedIds={selectedSet}
-              requiredIds={markedRequired}
-              os={os}
-              onToggle={toggle}
-            />
+            <div className="shrink-0">
+              <SearchBox value={q} onChange={setQuery} />
+              <ProviderChips
+                providers={providers}
+                selected={provider}
+                onSelect={setProvider}
+              />
+            </div>
+
+            <div className="min-w-0 lg:min-h-0 lg:grow lg:overflow-y-auto lg:pr-1">
+              {visible.length === 0 ? (
+                <p className="text-foreground/60 py-10 text-center text-sm">
+                  {q.trim()
+                    ? `Nothing matches “${q.trim()}” here.`
+                    : "Nothing in this slice is available on Linux."}
+                </p>
+              ) : (
+                /* Remounts the grid whenever the filter changes, which is what
+                   replays the staggered entrance — except for the search text,
+                   which changes per keystroke and would strobe the grid.
+                   Toggling an item does not change the key either, so the
+                   cards stay put while you build a kit. */
+                <CatalogGrid
+                  key={`${packSlug ?? ""}:${category}:${provider}`}
+                  items={visible}
+                  selectedIds={selectedSet}
+                  requiredIds={markedRequired}
+                  os={os}
+                  onToggle={toggle}
+                />
+              )}
+            </div>
           </div>
 
           <KitSidebar
@@ -457,6 +519,7 @@ export default function Page() {
             os={os}
             onOsChange={setOs}
             onRemove={toggle}
+            onClear={clearKit}
           />
           </div>
         </main>
