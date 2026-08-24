@@ -6,6 +6,7 @@ import {
   packApplied,
   providersOf,
   readCategory,
+  readKitOnly,
   readPack,
   readProvider,
   readQuery,
@@ -166,6 +167,28 @@ describe('packApplied', () => {
 
   it('ignores selections the pack does not contain', () => {
     expect(packApplied(['a'], new Set(['a', 'z']))).toBe(true)
+  })
+})
+
+describe('readKitOnly', () => {
+  it('is true for the exact string kit', () => {
+    expect(readKitOnly('kit')).toBe(true)
+  })
+
+  it('is false for an absent parameter', () => {
+    expect(readKitOnly(null)).toBe(false)
+  })
+
+  it('is false for an empty string', () => {
+    expect(readKitOnly('')).toBe(false)
+  })
+
+  it('is false for any other value, so a stale link renders the catalog', () => {
+    expect(readKitOnly('grid')).toBe(false)
+  })
+
+  it('is case sensitive, since the mode name is lower case by construction', () => {
+    expect(readKitOnly('Kit')).toBe(false)
   })
 })
 

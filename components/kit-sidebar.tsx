@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, Download, HardDrive, Lock, Trash2, X } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Download,
+  HardDrive,
+  Link2,
+  Lock,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { Item, Os } from "@/lib/types";
 import { formatSize } from "@/lib/resolve";
 
@@ -30,6 +39,8 @@ type Props = {
   query: string;
   /** Live origin, passed down so it matches what the route emits. */
   origin: string;
+  /** The link the generated script's header quotes back — the share artefact. */
+  shareUrl: string;
   os: Os;
   onOsChange: (os: Os) => void;
   onRemove: (id: string) => void;
@@ -54,12 +65,14 @@ export function KitSidebar({
   sizeMb,
   query,
   origin,
+  shareUrl,
   os,
   onOsChange,
   onRemove,
   onClear,
 }: Props) {
   const [status, setStatus] = useState<CopyStatus>("idle");
+  const [shareStatus, setShareStatus] = useState<CopyStatus>("idle");
   const empty = items.length === 0;
   const linux = os === "linux";
 
@@ -90,11 +103,25 @@ export function KitSidebar({
     }
   };
 
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareStatus("copied");
+      setTimeout(() => setShareStatus("idle"), 2000);
+    } catch {
+      // Same failure surface as the one-liner: the failed state renders the
+      // URL for a hand copy and stays up until the next attempt.
+      setShareStatus("failed");
+    }
+  };
+
   return (
     // `aside` is a `complementary` landmark, and an unlabelled landmark is a
     // list entry a screen-reader user cannot tell apart from any other. The
     // heading it already renders is the name.
     <aside
+      // Named so the mobile kit bar's "view kit" can `scrollIntoView` it.
+      id="kit-sidebar"
       aria-labelledby="kit-heading"
       // A full-height column of the fixed shell at `lg`, scrolling itself
       // when the viewport is shorter than the panel — which is what keeps the
@@ -352,6 +379,21 @@ export function KitSidebar({
             )}
             {status === "copied" ? "Copied" : "Copy one-liner"}
           </button>
+
+          <button
+            type="button"
+            onClick={copyShare}
+            disabled={empty}
+            className={`${CTA} border-border enabled:hover:border-secondary enabled:hover:bg-secondary/40
+              cursor-pointer border disabled:cursor-not-allowed disabled:opacity-40`}
+          >
+            {shareStatus === "copied" ? (
+              <Check className="size-4" aria-hidden />
+            ) : (
+              <Link2 className="size-4" aria-hidden />
+            )}
+            {shareStatus === "copied" ? "Copied" : "Share kit"}
+          </button>
         </div>
 
         {status === "failed" ? (
@@ -365,10 +407,25 @@ export function KitSidebar({
           </div>
         ) : null}
 
+        {shareStatus === "failed" ? (
+          <div className="mt-3">
+            <p className="text-warning text-xs">
+              The browser blocked the clipboard. Copy the link by hand:
+            </p>
+            <code className="border-border bg-background text-foreground/80 mt-1 block rounded-md border p-2 font-mono text-xs break-all select-all">
+              {shareUrl}
+            </code>
+          </div>
+        ) : null}
+
         <p aria-live="polite" className="sr-only">
           {status === "copied" ? "One-liner copied to clipboard" : ""}
           {status === "failed"
             ? "Copying failed. The one-liner is shown below the button, select it to copy it by hand."
+            : ""}
+          {shareStatus === "copied" ? "Share link copied to clipboard" : ""}
+          {shareStatus === "failed"
+            ? "Copying failed. The share link is shown below the button, select it to copy it by hand."
             : ""}
         </p>
 

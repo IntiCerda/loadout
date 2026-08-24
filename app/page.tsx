@@ -24,6 +24,7 @@ import {
   packApplied,
   providersOf,
   readCategory,
+  readKitOnly,
   readPack,
   readProvider,
   readQuery,
@@ -39,6 +40,7 @@ import { ProviderChips } from "@/components/provider-chips";
 import { PackChips } from "@/components/pack-chips";
 import { PackPreviewBar } from "@/components/pack-preview-bar";
 import { KitSidebar } from "@/components/kit-sidebar";
+import { MobileKitBar } from "@/components/mobile-kit-bar";
 import { ScriptPreview } from "@/components/script-preview";
 import { SearchBox } from "@/components/search-box";
 
@@ -78,6 +80,8 @@ type View = {
   provider: string;
   pack: string | null;
   q: string;
+  /** `?view=kit` — the grid shows the resolved kit instead of the catalog. */
+  kitOnly: boolean;
 };
 
 function readView(params: URLSearchParams): View {
@@ -90,6 +94,7 @@ function readView(params: URLSearchParams): View {
     ),
     pack: readPack(params.get("pack"), packs),
     q: readQuery(params.get("q")),
+    kitOnly: readKitOnly(params.get("view")),
   };
 }
 
@@ -108,6 +113,7 @@ function hrefFor(ids: string[], os: Os, view: View): string {
     view.provider === ALL ? "" : `prov=${encodeURIComponent(view.provider)}`,
     view.pack ? `pack=${encodeURIComponent(view.pack)}` : "",
     view.q.trim() ? `q=${encodeURIComponent(view.q)}` : "",
+    view.kitOnly ? "view=kit" : "",
   ].filter(Boolean);
   return parts.length
     ? `${window.location.pathname}?${parts.join("&")}`
@@ -185,6 +191,9 @@ export default function Page() {
         // The search survives a category change: the box visibly holds its
         // text, so silently discarding it would contradict the screen.
         q: readQuery(live.get("q")),
+        // Picking a slice of the catalog is a request to browse it, so it
+        // leaves the kit-only view the same way it leaves a preview.
+        kitOnly: false,
       });
     },
     [commit],
@@ -198,6 +207,7 @@ export default function Page() {
         provider,
         pack: null,
         q: readQuery(live.get("q")),
+        kitOnly: false,
       });
     },
     [commit],
@@ -209,8 +219,9 @@ export default function Page() {
       commit(parseIds(live.get("p")), readOs(live), {
         ...readView(live),
         // Typing is a request to search the catalog, so it closes a preview
-        // the same way the rail does.
+        // — and the kit-only view — the same way the rail does.
         pack: null,
+        kitOnly: false,
         q,
       });
     },
@@ -244,10 +255,26 @@ export default function Page() {
         // Opening a preview clears the search: the grid is about to show the
         // pack, and a search box still holding text would claim otherwise.
         q: slug ? "" : view.q,
+        // A preview and the kit-only view both claim the whole grid, so
+        // opening one closes the other.
+        kitOnly: slug ? false : view.kitOnly,
       });
     },
     [commit],
   );
+
+  // The one writer for `?view=kit`. Entering leaves the pack preview for the
+  // same reason opening a preview leaves kit view: the grid can only show one
+  // of them.
+  const toggleKitOnly = useCallback(() => {
+    const live = new URLSearchParams(window.location.search);
+    const view = readView(live);
+    commit(parseIds(live.get("p")), readOs(live), {
+      ...view,
+      pack: null,
+      kitOnly: !view.kitOnly,
+    });
+  }, [commit]);
 
   // Applying a pack adds its items; confirming an already-applied pack removes
   // exactly the ids it contributed, so packs compose instead of overwriting
@@ -312,7 +339,19 @@ export default function Page() {
 
   // Which slice is on screen. Read from the same URL the selection lives in,
   // in its own parameters, so a link reproduces the view as well as the kit.
-  const { category, provider, pack: packSlug, q } = readView(params);
+  const {
+    category,
+    provider,
+    pack: packSlug,
+    q,
+    kitOnly: kitOnlyParam,
+  } = readView(params);
+
+  // `?view=kit` over an empty kit would render an empty grid under the empty-
+  // state copy for a filtered catalog — a lie twice over — so the parameter
+  // only takes effect while there is a kit to show. The chip stays visible
+  // but inert for the same reason.
+  const kitOnly = kitOnlyParam && installable.length > 0;
 
   // Everything the rail advertises derives from what the chosen target can
   // actually install. Counting the full catalog put a "3" next to a Linux
@@ -364,11 +403,16 @@ export default function Page() {
   // drops. Selections are untouched — hiding is a view. The browse path gets
   // this for free from `targetCatalog`; a preview's items still need it.
   const visible = useMemo(() => {
+    // The kit-only view ignores category, provider and search: it answers
+    // "what exactly am I about to install", and a silently narrowed answer
+    // to that question is worse than none. Touching any of those controls
+    // exits the view instead.
+    if (kitOnly) return installable;
     if (preview) {
       return linux ? preview.items.filter(linuxSupported) : preview.items;
     }
     return searchItems(filterItems(inCategory, ALL, provider), q);
-  }, [preview, linux, inCategory, provider, q]);
+  }, [kitOnly, installable, preview, linux, inCategory, provider, q]);
 
   // A dependency the preview pulled in is marked as one even when the kit has
   // not got it yet — that is the "and here is what comes with it" the preview
@@ -401,7 +445,14 @@ export default function Page() {
           one normal document — three nested scrollers on a 375px screen would
           leave nothing to scroll. */}
       <div className="app-zone lg:h-dvh">
-        <main className="mx-auto w-full max-w-7xl px-4 pb-12 sm:px-6 lg:flex lg:h-full lg:flex-col lg:px-8 lg:pb-0">
+        <main
+          // `pb-24` clears the mobile kit bar's measured height (~68px plus
+          // safe area) while it renders; `lg:pb-0` keeps the fixed shell
+          // unchanged either way.
+          className={`mx-auto w-full max-w-7xl px-4 sm:px-6 lg:flex lg:h-full lg:flex-col lg:px-8 lg:pb-0 ${
+            installable.length > 0 ? "pb-24" : "pb-12"
+          }`}
+        >
           {/* The band: presets, script disclosure, pack preview. Static at the
               top of the shell — the shell itself never scrolls at `lg`, so the
               sticky machinery (and the measured `--band-h` it needed) is gone.
@@ -498,7 +549,43 @@ export default function Page() {
             style={{ "--cat": categoryHue(activeCategory) } as CSSProperties}
           >
             <div className="shrink-0">
-              <SearchBox value={q} onChange={setQuery} />
+              <div className="flex items-start gap-2">
+                <div className="min-w-0 grow">
+                  <SearchBox value={q} onChange={setQuery} />
+                </div>
+                {/* Kit-only toggle. Inert rather than hidden when the kit is
+                    empty: a control that vanishes and reappears teaches the
+                    user nothing about where it lives. `aria-disabled`, not
+                    `disabled`, so it stays focusable and announces why it
+                    does nothing. */}
+                <button
+                  type="button"
+                  aria-pressed={kitOnly}
+                  aria-disabled={installable.length === 0}
+                  onClick={installable.length === 0 ? undefined : toggleKitOnly}
+                  className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border px-3 text-sm
+                    transition-colors duration-[180ms]
+                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring
+                    ${
+                      installable.length === 0
+                        ? "border-border text-foreground/60 cursor-not-allowed opacity-60"
+                        : kitOnly
+                          ? "border-accent bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-foreground cursor-pointer"
+                          : "border-border text-foreground/80 hover:border-muted-foreground/60 hover:bg-primary cursor-pointer"
+                    }`}
+                >
+                  In kit
+                  <span
+                    className={`flex min-w-5 items-center justify-center rounded px-1 font-mono text-[10px] font-bold ${
+                      kitOnly
+                        ? "bg-[color-mix(in_srgb,var(--accent)_30%,var(--secondary))] text-foreground"
+                        : "bg-secondary text-foreground"
+                    }`}
+                  >
+                    {installable.length}
+                  </span>
+                </button>
+              </div>
               <ProviderChips
                 providers={providers}
                 selected={provider}
@@ -524,7 +611,7 @@ export default function Page() {
                    Toggling an item does not change the key either, so the
                    cards stay put while you build a kit. */
                 <CatalogGrid
-                  key={`${packSlug ?? ""}:${category}:${provider}`}
+                  key={`${kitOnly}:${packSlug ?? ""}:${category}:${provider}`}
                   items={visible}
                   selectedIds={selectedSet}
                   requiredIds={markedRequired}
@@ -542,6 +629,7 @@ export default function Page() {
             sizeMb={sizeMb}
             query={query}
             origin={origin}
+            shareUrl={shareUrl}
             os={os}
             onOsChange={setOs}
             onRemove={toggle}
@@ -550,6 +638,15 @@ export default function Page() {
           </div>
         </main>
       </div>
+
+      {installable.length > 0 ? (
+        <MobileKitBar
+          count={installable.length}
+          sizeMb={sizeMb}
+          query={query}
+          os={os}
+        />
+      ) : null}
     </>
   );
 }

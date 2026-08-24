@@ -116,6 +116,15 @@ export function readPack(raw: string | null, packs: Pack[]): string | null {
 }
 
 /**
+ * Kit-only view flag from the query string. Only the exact string `kit`
+ * activates it: the parameter names a mode, not free text, so anything else —
+ * including a stale or hand-edited value — renders the plain catalog.
+ */
+export function readKitOnly(raw: string | null): boolean {
+  return raw === 'kit'
+}
+
+/**
  * Whether a pack's ids are all directly selected already. This is the exact
  * condition `applyPack` treats as "remove", so the chip, the preview bar and
  * the mutation cannot disagree about which way the next click goes.
