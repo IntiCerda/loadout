@@ -63,10 +63,16 @@ export type Item = {
    * This field exists from day one on purpose. The Linux generator lands in
    * Phase 5 and is cheap; backfilling this across 80 catalog entries later
    * would not be.
+   *
+   * `userScoped` marks a vendor script that unpacks into `$HOME` (deno, bun,
+   * zed). The generated script runs as root, so without it these land in
+   * `/root` -- a toolchain the desktop user never sees. Leave it off for
+   * installers that genuinely need root and write system-wide (ollama,
+   * azure-cli, helm).
    */
   linux?:
     | { installer: 'apt'; ref: string }
-    | { installer: 'script'; ref: string }
+    | { installer: 'script'; ref: string; userScoped?: true }
   /**
    * Ids of items that must be included whenever this one is selected.
    *

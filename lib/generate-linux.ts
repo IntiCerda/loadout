@@ -23,7 +23,7 @@ type LinuxInstaller = Exclude<Installer, 'winget' | 'wsl'>
  */
 function linuxTarget(
   item: Item,
-): { installer: LinuxInstaller; ref: string } | null {
+): { installer: LinuxInstaller; ref: string; userScoped?: boolean } | null {
   if (item.installer === 'wsl') return null
   if (item.installer === 'winget') return item.linux ?? null
   return { installer: item.installer, ref: item.ref }
@@ -112,11 +112,21 @@ const HELPERS: Record<LinuxInstaller, string> = {
   // into bash. A vendor script read from its own stdin cannot prompt, but it
   // also cannot read anything else -- and several of them do. Closing stdin
   // explicitly makes the no-tty rule hold for code we did not write.
+  //
+  // "$2" = user marks an installer that unpacks into $HOME (deno, bun, zed).
+  // Run as root those land in /root -- a toolchain the desktop user never
+  // sees -- so they go through as_user. The chmod matters: mktemp creates the
+  // file 0600 owned by root, which the target of runuser cannot read.
   script: `script_install() {
   echo "  running vendor install script: $1"
   tmp="$(mktemp)"
   if curl -fsSL "$1" -o "$tmp"; then
-    bash "$tmp" </dev/null
+    if [ "$2" = user ]; then
+      chmod 644 "$tmp"
+      as_user bash "$tmp" </dev/null
+    else
+      bash "$tmp" </dev/null
+    fi
   else
     echo "  could not download $1, skipping."
   fi
@@ -194,9 +204,13 @@ const HELPERS: Record<LinuxInstaller, string> = {
 }`,
 }
 
-const CALLS: Record<LinuxInstaller, (ref: string) => string> = {
+const CALLS: Record<
+  LinuxInstaller,
+  (ref: string, userScoped?: boolean) => string
+> = {
   apt: (ref) => `apt_install ${shLiteral(ref)}`,
-  script: (ref) => `script_install ${shLiteral(ref)}`,
+  script: (ref, userScoped) =>
+    `script_install ${shLiteral(ref)}${userScoped ? ' user' : ''}`,
   font: (ref) => `font_install ${shLiteral(ref)}`,
   vscode: (ref) => `vscode_ext ${shLiteral(ref)}`,
   npm: (ref) => `npm_global ${shLiteral(ref)}`,
@@ -224,7 +238,11 @@ const PHASES: { installer: LinuxInstaller; label: string }[] = [
 /** Phases that install a package through apt and so need a fresh index. */
 const APT_DEPENDENT: LinuxInstaller[] = ['apt', 'pipx', 'font']
 
-/** Phases that write into the invoking user's home directory. */
+/**
+ * Phases that write into the invoking user's home directory. `script` is not
+ * here because it is user-scoped per item, not per installer -- see the
+ * `userScoped` flag on the linux ref.
+ */
 const USER_SCOPED: LinuxInstaller[] = ['vscode', 'pipx', 'claude-plugin']
 
 /**
@@ -276,8 +294,15 @@ export function generateBash(items: Item[], shareUrl: string): string {
   })).filter((phase) => phase.items.length > 0)
 
   const used = active.map((phase) => phase.installer)
+  // The script helper's user branch calls as_user, so a user-scoped script
+  // item forces the helper in even when no USER_SCOPED phase is active. The
+  // branch is dead without such an item, which is what makes omitting as_user
+  // safe in the root-scripts-only case.
+  const needsAsUser =
+    used.some((installer) => USER_SCOPED.includes(installer)) ||
+    supported.some((item) => linuxTarget(item)?.userScoped)
   const helpers = [
-    used.some((installer) => USER_SCOPED.includes(installer)) ? AS_USER : '',
+    needsAsUser ? AS_USER : '',
     ...used.map((installer) => HELPERS[installer]),
   ]
     .filter(Boolean)
@@ -291,7 +316,7 @@ export function generateBash(items: Item[], shareUrl: string): string {
         // Unreachable: `active` is built from items that already resolved.
         // Kept as a value rather than a `!` so the type is honest.
         if (!target) return ''
-        return `${CALLS[target.installer](target.ref)}  # ${commentSafe(item.name)}`
+        return `${CALLS[target.installer](target.ref, target.userScoped)}  # ${commentSafe(item.name)}`
       })
       .filter(Boolean)
       .join('\n')

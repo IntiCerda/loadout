@@ -43,3 +43,11 @@ order optimizes user pain first, shop-window second, durability third.
 - Verify on production after every deploy, with the exact repro when fixing.
 - Catalog/pack ids only ever reference verified entries.
 - No new dependencies.
+
+## Outcome (same day)
+
+All six phases landed. New open items discovered by the container run, for a
+future session: the generated bash has no curl preflight (each vendor install
+degrades to a named skip — acceptable but silent-ish), and deno/bun's vendor
+installers need `unzip`, which bare noble lacks. Same class of fix: an
+apt-installed prerequisites step or a preflight naming what is missing.

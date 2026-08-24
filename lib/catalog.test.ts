@@ -160,6 +160,22 @@ describe('linux coverage', () => {
       }
     }
   })
+
+  it('marks exactly the vendor scripts that unpack into $HOME as user-scoped', () => {
+    // Read from each installer's actual behavior: deno unpacks into ~/.deno,
+    // bun into ~/.bun, zed into ~/.local. Ollama, azure-cli and helm write
+    // system-wide and need root. A miss on either side is a real bug: a
+    // user-scoped installer run as root lands in /root, a root installer run
+    // as the user fails outright.
+    const USER_SCOPED_SCRIPTS = new Set(['deno', 'bun', 'zed'])
+    for (const item of catalog) {
+      if (item.linux?.installer !== 'script') continue
+      expect(
+        item.linux.userScoped ?? false,
+        `${item.id} userScoped flag`,
+      ).toBe(USER_SCOPED_SCRIPTS.has(item.id))
+    }
+  })
 })
 
 describe('providers', () => {

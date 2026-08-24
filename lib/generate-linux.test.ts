@@ -20,6 +20,18 @@ const ollama: Item = {
   ref: 'Ollama.Ollama',
   linux: { installer: 'script', ref: 'https://ollama.com/install.sh' },
 }
+const deno: Item = {
+  ...base,
+  id: 'deno',
+  name: 'Deno',
+  installer: 'winget',
+  ref: 'DenoLand.Deno',
+  linux: {
+    installer: 'script',
+    ref: 'https://deno.land/install.sh',
+    userScoped: true,
+  },
+}
 const docker: Item = {
   ...base,
   id: 'd',
@@ -125,6 +137,26 @@ describe('generateBash', () => {
     const script = generateBash([ollama], URL)
     expect(script).toContain("script_install 'https://ollama.com/install.sh'")
     expect(script).not.toContain('apt_install')
+  })
+
+  it('runs a user-scoped vendor script as the invoking user, not as root', () => {
+    // deno's installer unpacks into $HOME. Run as root that is /root/.deno --
+    // a toolchain the desktop user never sees, which looks like success.
+    const script = generateBash([deno], URL)
+    expect(script).toContain("script_install 'https://deno.land/install.sh' user")
+    expect(script).toContain('as_user()')
+    expect(script).toContain('as_user bash "$tmp" </dev/null')
+    // mktemp creates the file 0600 owned by root; without the chmod the
+    // runuser target cannot read the script it is asked to run.
+    expect(script).toContain('chmod 644 "$tmp"')
+  })
+
+  it('keeps a root vendor script running as root, without the user marker', () => {
+    // Ollama's installer writes system-wide and needs root. The call must not
+    // carry the user marker, and ollama alone must not drag in as_user.
+    const script = generateBash([ollama], URL)
+    expect(script).not.toContain("script_install 'https://ollama.com/install.sh' user")
+    expect(script).not.toContain('as_user()')
   })
 
   it('names the items it dropped instead of silently omitting them', () => {

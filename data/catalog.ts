@@ -132,8 +132,13 @@ export const catalog: Item[] = [
     installer: 'winget',
     ref: 'DenoLand.Deno',
     // No apt package in noble. The vendor script is the documented Linux
-    // install and is non-interactive.
-    linux: { installer: 'script', ref: 'https://deno.land/install.sh' },
+    // install and is non-interactive. It unpacks into ~/.deno, so it must run
+    // as the invoking user, not root.
+    linux: {
+      installer: 'script',
+      ref: 'https://deno.land/install.sh',
+      userScoped: true,
+    },
     sizeMb: 40,
   },
   {
@@ -144,7 +149,12 @@ export const catalog: Item[] = [
     installer: 'winget',
     ref: 'Oven-sh.Bun',
     // No apt package in noble. This is the install line from bun's own docs.
-    linux: { installer: 'script', ref: 'https://bun.sh/install' },
+    // It unpacks into ~/.bun, so it must run as the invoking user, not root.
+    linux: {
+      installer: 'script',
+      ref: 'https://bun.sh/install',
+      userScoped: true,
+    },
     sizeMb: 55,
   },
   {
@@ -262,8 +272,13 @@ export const catalog: Item[] = [
     category: 'editors',
     installer: 'winget',
     ref: 'ZedIndustries.Zed',
-    // Not in noble, but Zed's documented Linux install is a shell script.
-    linux: { installer: 'script', ref: 'https://zed.dev/install.sh' },
+    // Not in noble, but Zed's documented Linux install is a shell script. It
+    // unpacks into ~/.local, so it must run as the invoking user, not root.
+    linux: {
+      installer: 'script',
+      ref: 'https://zed.dev/install.sh',
+      userScoped: true,
+    },
     sizeMb: 180,
   },
   {
