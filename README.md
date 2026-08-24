@@ -3,12 +3,14 @@
 **Pick your stack. Get the recipe.**
 
 Loadout is Ninite for Windows developers: tick apps, VS Code extensions, fonts,
-global packages and local AI models out of a curated catalog, and get back one
-readable install script that installs all of it — PowerShell for Windows 10 and
-11, or bash for Debian and Ubuntu.
+global packages and local AI models out of a curated catalog of 123 verified
+items, and get back one readable install script that installs all of it —
+PowerShell for Windows 10 and 11, or bash for Debian and Ubuntu.
 
 There is no installer to trust, no account, and no database. The selection
-lives in the query string, so a link *is* the machine setup.
+lives in the query string, so a link *is* the machine setup — the **Share kit**
+button copies it, and everything else about the view (category, provider,
+search, even the pack you are previewing) lives in the same URL.
 
 ## The one-liner
 
@@ -36,20 +38,23 @@ And it is `sudo bash -c "$(...)"`, never `curl ... | sudo bash`. The second form
 gives the script no controlling terminal, so any prompt — an apt confirmation, a
 sudo password — hangs forever with nothing printed.
 
-Not everything in the catalog has a Linux equivalent. Twelve of the sixty-two
-items do not: Docker Desktop and the WSL distros by nature, and a handful that
-ship only an AppImage, a `.deb` or a tarball. Those stay visible and selectable,
-get marked **Not available on Linux** on the card, are counted in a sidebar
-warning before you download, and are named by the script itself at runtime for
-anyone who never opened the page. They are never silently dropped.
+Not everything in the catalog has a Linux equivalent — 37 of the 123 items do
+not: Docker Desktop and the WSL distros by nature, and a long tail that ships
+only an AppImage, a `.deb` or a tarball. On the Linux target those disappear
+from the grid and every category count adapts (the WSL category disappears
+outright), anything already selected is counted in a sidebar warning before
+you download, and the script itself names each one it skipped at runtime, for
+anyone who never opened the page. Nothing is ever silently dropped.
 
 ## What it looks like
 
 ![Loadout — the catalog, a pack applied, and the running download total](docs/screenshot.png)
 
-Pick a pack or tick items one at a time. The sidebar keeps a running count and
-download total — Ollama models are 4 to 9 GB each, and nothing else warns you
-before the download starts.
+Pick one of the ten packs or tick items one at a time. Categories filter as a
+rail with a hue per category, `/` focuses the search, **In kit** shows only
+what you picked, and the sidebar keeps the running count, an itemised list and
+the download total — Ollama models are 4 to 9 GB each, and nothing else warns
+you before the download starts.
 
 ![The generated PowerShell, rendered live as you select](docs/screenshot-script.png)
 
@@ -57,11 +62,17 @@ Expand the panel and the generated script is right there, re-rendered on every
 tick, at a width where you can actually read it. It is byte-for-byte what
 `/api/script` serves — asserted by a test, not assumed.
 
-Selecting a VS Code extension pulls VS Code in as **Required by your
-selection**: locked, still keyboard-reachable, and announced as unavailable
-rather than silently skipped.
+Selecting a VS Code extension pulls VS Code in as **Required by another
+item**: locked, still keyboard-reachable, and announced rather than silently
+included.
 
-Captured from a production build at 1440x900.
+![On a phone, a fixed bottom bar keeps the count, the size and the download in reach](docs/screenshot-mobile.png)
+
+On a phone the kit follows you: a fixed bottom bar carries the count, the
+total size and the Download button, so the selection is never twenty screens
+of scrolling away.
+
+Captured from production at 1440x900 and 375x812.
 
 ## The generated script is readable by design
 
@@ -141,7 +152,10 @@ Two rules matter more than the rest:
    elevated shell.
 
 `CONTRIBUTING.md` has the full rules, and `lib/catalog.test.ts` enforces the
-mechanical half of them.
+mechanical half of them. CI re-verifies **every** ref against its live
+registry weekly and on any catalog change (`scripts/verify-refs.mjs`), so a
+renamed winget id or a dead font URL fails a build instead of a stranger's
+install.
 
 ## Local development
 
@@ -161,7 +175,10 @@ npm run build   # next build
 | `data/packs.ts` | Curated packs referencing catalog ids. Data only. |
 | `lib/url.ts` | Parses `?p=`. The trust boundary — validates and caps input. |
 | `lib/resolve.ts` | Expands `requires` transitively, dedupes, sums size. |
+| `lib/filter.ts` | Category/provider/search/pack/kit view state, all URL-read. |
 | `lib/generate.ts` | Emits the PowerShell. Owns helpers and phase order. |
+| `lib/generate-linux.ts` | Emits the bash. Same contracts, different shell. |
+| `scripts/verify-refs.mjs` | CI: re-verifies every ref against its registry. |
 | `lib/brand.ts` | Brand name and canonical URL. One constant each. |
 | `app/api/script/route.ts` | Serves the script as `text/plain` or a `.ps1`. |
 
