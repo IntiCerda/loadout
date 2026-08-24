@@ -1,0 +1,33 @@
+# The catalog is an allowlist of commands strangers run elevated, so its refs
+# must stay true to the registries they point at. This re-verifies every one
+# weekly and on any catalog change, and fails with the list of rotten refs.
+name: Verify catalog refs
+
+on:
+  schedule:
+    # Mondays 09:00 UTC — early in the week so a rotten ref gets fixed before
+    # the weekend traffic.
+    - cron: '0 9 * * 1'
+  push:
+    branches: [master]
+    paths: ['data/catalog.ts', 'scripts/verify-refs.mjs']
+  pull_request:
+    paths: ['data/catalog.ts', 'scripts/verify-refs.mjs']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify every ref against its registry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node --experimental-strip-types scripts/verify-refs.mjs

@@ -1,9 +1,10 @@
 import type { Pack } from '@/lib/types'
 
 /**
- * The eight launch packs. The first five were seeded from the three hardcoded
+ * The ten packs. The first five were seeded from the three hardcoded
  * scripts in `IntiCerda/Script-Dev-W10-W11`, which is where this catalog came
- * from; `data-ml`, `full-stack` and `terminal` landed with the full catalog.
+ * from; `data-ml`, `full-stack` and `terminal` landed with the full catalog;
+ * `cloud-ops` and `systems` landed with the 123-item catalog expansion.
  *
  * Every id here must exist in `data/catalog.ts`. A pack referencing a missing
  * id silently ships a chip that can never read as applied, because `resolve`
@@ -34,16 +35,17 @@ export const packs: Pack[] = [
       'ext-eslint',
       'ext-prettier',
       'ext-tailwind',
+      'ext-error-lens',
       'ext-gitlens',
       'font-jetbrains-mono',
     ],
   },
   {
-    // Distinguished by: kubectl, k9s
+    // Distinguished by: ubuntu (kubectl/k9s/terraform/helm are shared with cloud-ops)
     slug: 'devops',
     name: 'DevOps',
-    description: 'Docker Desktop on WSL2, the Kubernetes clients, Git and an editor.',
-    items: ['docker', 'ubuntu', 'kubectl', 'k9s', 'git', 'vscode'],
+    description: 'Docker Desktop on WSL2, the Kubernetes clients, Terraform, Git and an editor.',
+    items: ['docker', 'ubuntu', 'kubectl', 'k9s', 'terraform', 'helm', 'git', 'vscode'],
   },
   {
     // Distinguished by: qwen2.5-coder-7b, ext-continue
@@ -53,23 +55,24 @@ export const packs: Pack[] = [
     items: ['ollama', 'qwen2.5-coder-7b', 'nomic-embed-text', 'ext-continue'],
   },
   {
-    // Distinguished by: claude-code, codex-cli
+    // Distinguished by: claude-code, codex-cli, gemini-cli
     slug: 'ai-agents',
     name: 'AI Agents',
-    description: 'Claude Code and Codex CLI in the terminal, on Node LTS.',
-    items: ['node', 'claude-code', 'codex-cli', 'git', 'vscode'],
+    description: 'Claude Code, Codex CLI and Gemini CLI in the terminal, on Node LTS.',
+    items: ['node', 'claude-code', 'codex-cli', 'gemini-cli', 'git', 'vscode'],
   },
   {
-    // Distinguished by: ruff
+    // Distinguished by: ruff, ext-jupyter
     slug: 'data-ml',
     name: 'Data / ML',
-    description: 'Python with Ruff, the VS Code tooling and a local embedding model.',
+    description: 'Python with Ruff, Jupyter support and a local embedding model.',
     items: [
       'python',
       'ruff',
       'git',
       'vscode',
       'ext-python',
+      'ext-jupyter',
       'ollama',
       'nomic-embed-text',
     ],
@@ -93,13 +96,14 @@ export const packs: Pack[] = [
     ],
   },
   {
-    // Distinguished by: windows-terminal, and every Rust CLI below it
+    // Distinguished by: windows-terminal, starship, fzf, and every Rust CLI below
     slug: 'terminal',
     name: 'Terminal',
-    description: 'A Windows shell worth living in: modern CLIs and a Nerd Font.',
+    description: 'A Windows shell worth living in: modern CLIs, a prompt and a Nerd Font.',
     items: [
       'windows-terminal',
-      'powertoys',
+      'starship',
+      'fzf',
       'git',
       'gh',
       'ripgrep',
@@ -109,6 +113,29 @@ export const packs: Pack[] = [
       'jq',
       '7zip',
       'font-jetbrains-mono-nerd',
+    ],
+  },
+  {
+    // Distinguished by: aws-cli, azure-cli
+    slug: 'cloud-ops',
+    name: 'Cloud Ops',
+    description: 'Terraform, the Kubernetes clients and both major cloud CLIs.',
+    items: ['terraform', 'kubectl', 'helm', 'k9s', 'aws-cli', 'azure-cli', 'git'],
+  },
+  {
+    // Distinguished by: rust, zig, llvm, ext-rust-analyzer
+    slug: 'systems',
+    name: 'Systems',
+    description: 'Rust, Zig and LLVM with the editor tooling for native code.',
+    items: [
+      'rust',
+      'zig',
+      'llvm',
+      'make',
+      'git',
+      'vscode',
+      'ext-rust-analyzer',
+      'ext-cpptools',
     ],
   },
 ]
