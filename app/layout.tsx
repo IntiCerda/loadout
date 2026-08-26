@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { BRAND, TAGLINE, SITE_URL } from "@/lib/brand";
 import "./globals.css";
 
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </p>
         </noscript>
         {children}
+        <Analytics />
       </body>
     </html>
   );
