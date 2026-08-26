@@ -159,6 +159,40 @@ describe('generateBash', () => {
     expect(script).not.toContain('as_user()')
   })
 
+  it('installs curl and CA certificates before any vendor script, checking first', () => {
+    // Bare ubuntu:24.04 has neither; without this every script item degrades
+    // to "could not download <url>, skipping." on the exact machines a setup
+    // script is for. Check-before-install is what keeps a second run free.
+    const script = generateBash([ollama], URL)
+    expect(script).toContain('command -v curl >/dev/null 2>&1 || missing="curl"')
+    expect(script).toContain(
+      'dpkg -s ca-certificates >/dev/null 2>&1 || missing="$missing ca-certificates"',
+    )
+    expect(script).toContain('if [ -n "$missing" ]')
+    expect(script).toContain('apt-get install -y --no-install-recommends $missing')
+    expect(script.indexOf('|| missing="curl"')).toBeLessThan(
+      script.indexOf('apt-get install -y --no-install-recommends $missing'),
+    )
+    expect(script.indexOf('if [ -n "$missing" ]')).toBeLessThan(
+      script.indexOf('script_install'),
+    )
+  })
+
+  it('adds unzip to the prerequisites only for zip-unpacking installers', () => {
+    // deno's installer unpacks a zip; ollama's does not. The unzip line must
+    // track what the selected installers actually use, not the script phase.
+    expect(generateBash([deno], URL)).toContain(
+      'command -v unzip >/dev/null 2>&1 || missing="$missing unzip"',
+    )
+    expect(generateBash([ollama], URL)).not.toContain('missing="$missing unzip"')
+  })
+
+  it('emits no prerequisites block when nothing runs a vendor script', () => {
+    // apt items ride the distro's own curl-free path, and an ollama model
+    // pull assumes the ollama CLI is already there -- neither needs curl.
+    expect(generateBash([git, ext, model], URL)).not.toContain('missing=')
+  })
+
   it('names the items it dropped instead of silently omitting them', () => {
     const script = generateBash([git, docker, distro], URL)
     expect(script).toContain('Docker Desktop')

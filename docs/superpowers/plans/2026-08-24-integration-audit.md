@@ -51,3 +51,15 @@ future session: the generated bash has no curl preflight (each vendor install
 degrades to a named skip — acceptable but silent-ish), and deno/bun's vendor
 installers need `unzip`, which bare noble lacks. Same class of fix: an
 apt-installed prerequisites step or a preflight naming what is missing.
+
+**Closed 2026-08-26.** The generator now emits a prerequisites block whenever
+the selection contains a `script`-installer item: check-first (`command -v` /
+`dpkg -s`), then `apt-get install` only what is missing — `curl` +
+`ca-certificates` always, `unzip` only when a selected ref is in the
+`ZIP_SCRIPTS` list (deno, bun; zed ships a tarball, so the `userScoped` flag
+was deliberately not reused as the carrier). Proven on bare `ubuntu:24.04`
+with a generated deno+helm script run as a sudo-invoked root
+(`useradd -m dev` + `SUDO_USER=dev`, `runuser` is in the base image): the
+script installed its own prerequisites, deno 2.9.5 landed in
+`/home/dev/.deno` (not `/root`), helm v3.21.4 in `/usr/local/bin`, exit 0.
+No open items remain from this plan.

@@ -239,6 +239,42 @@ const PHASES: { installer: LinuxInstaller; label: string }[] = [
 const APT_DEPENDENT: LinuxInstaller[] = ['apt', 'pipx', 'font']
 
 /**
+ * Vendor install scripts that unpack a zip archive and so need `unzip`, which
+ * bare Ubuntu lacks. Keyed by the exact catalog ref rather than by the
+ * `userScoped` flag: userScoped means "installs into $HOME", and zed is
+ * user-scoped but ships a tarball. A const list here is less machinery than a
+ * new catalog field for two known URLs, at the cost of extending it if a
+ * zip-based installer is ever added.
+ */
+const ZIP_SCRIPTS = ['https://deno.land/install.sh', 'https://bun.sh/install']
+
+/**
+ * Every vendor install script is fetched with curl over https, and a bare
+ * image -- docker's ubuntu:24.04 -- ships neither curl nor CA certificates,
+ * so without this every script item degrades to a named skip the script
+ * itself could have fixed. Check first: a machine that already has them
+ * never touches apt, which is what keeps a second run free and safe.
+ */
+function prereqBlock(scriptRefs: string[]): string {
+  const wantUnzip = scriptRefs.some((ref) => ZIP_SCRIPTS.includes(ref))
+  return [
+    `missing=""`,
+    `command -v curl >/dev/null 2>&1 || missing="curl"`,
+    `dpkg -s ca-certificates >/dev/null 2>&1 || missing="$missing ca-certificates"`,
+    ...(wantUnzip
+      ? [`command -v unzip >/dev/null 2>&1 || missing="$missing unzip"`]
+      : []),
+    `if [ -n "$missing" ]; then`,
+    `  echo "Installing prerequisites for the vendor installers:$missing"`,
+    `  apt-get update -y`,
+    // $missing is intentionally unquoted: it is a fixed space-separated list
+    // of package names from this function, never catalog or user input.
+    `  apt-get install -y --no-install-recommends $missing`,
+    `fi`,
+  ].join('\n')
+}
+
+/**
  * Phases that write into the invoking user's home directory. `script` is not
  * here because it is user-scoped per item, not per installer -- see the
  * `userScoped` flag on the linux ref.
@@ -294,6 +330,10 @@ export function generateBash(items: Item[], shareUrl: string): string {
   })).filter((phase) => phase.items.length > 0)
 
   const used = active.map((phase) => phase.installer)
+  const scriptRefs = supported.flatMap((item) => {
+    const target = linuxTarget(item)
+    return target?.installer === 'script' ? [target.ref] : []
+  })
   // The script helper's user branch calls as_user, so a user-scoped script
   // item forces the helper in even when no USER_SCOPED phase is active. The
   // branch is dead without such an item, which is what makes omitting as_user
@@ -334,6 +374,7 @@ export function generateBash(items: Item[], shareUrl: string): string {
     used.some((installer) => APT_DEPENDENT.includes(installer))
       ? 'apt-get update -y\n'
       : '',
+    scriptRefs.length > 0 ? `${prereqBlock(scriptRefs)}\n` : '',
     helpers,
     '',
     notes,
